@@ -1,570 +1,591 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Portal</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Game Portal — 10 Games</title>
 <style>
-body {
-    margin: 0;
-    background: radial-gradient(circle at top, #1f2937 0, #020617 60%);
-    font-family: system-ui;
-    color: #e5e7eb;
-}
-
-/* HEADER */
-header {
-    padding: 16px;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 600;
-    background: rgba(2,6,23,0.96);
-    border-bottom: 1px solid #1f2937;
-}
-
-/* GAME GRID */
-#gameMenu {
-    padding: 18px;
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-}
-
-.gameBtn {
-    background: radial-gradient(circle at top, #1f2937 0, #020617 80%);
-    border-radius: 16px;
-    padding: 22px 10px;
-    text-align: center;
-    font-size: 18px;
-    cursor: pointer;
-    border: 1px solid #1f2937;
-    box-shadow: 0 10px 20px rgba(15,23,42,0.7);
-    transition: 0.18s;
-}
-.gameBtn span {
-    display: block;
-    font-size: 30px;
-    margin-bottom: 8px;
-}
-.gameBtn:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 16px 30px rgba(15,23,42,0.9);
-    border-color: #38bdf8;
-}
-
-/* FULLSCREEN GAME */
-#gameScreen {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: none;
-    flex-direction: column;
-}
-
-#topBar {
-    padding: 10px 14px;
-    background: rgba(2,6,23,0.96);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #1f2937;
-    font-size: 16px;
-}
-
-#backBtn {
-    background: #1f2937;
-    padding: 6px 12px;
-    border-radius: 999px;
-    cursor: pointer;
-    border: 1px solid #111827;
-    font-size: 14px;
-}
-#backBtn:hover {
-    background: #111827;
-}
-
-canvas {
-    flex: 1;
-    background: #000;
-    touch-action: none;
-    display: block;
-}
+  :root{
+    --bg:#071026;
+    --panel:#0f1724;
+    --card:#0f172a;
+    --accent:#38bdf8;
+    --muted:#9ca3af;
+    --glass: rgba(255,255,255,0.03);
+    --radius:14px;
+    --btn-h:84px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(56,189,248,0.06), transparent 8%),
+    radial-gradient(900px 500px at 90% 90%, rgba(99,102,241,0.03), transparent 8%),
+    var(--bg);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  header{
+    height:64px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    position:sticky;top:0;z-index:40;
+  }
+  header .title{font-weight:700;letter-spacing:0.02em}
+  main{display:grid;grid-template-columns: 1fr 420px;gap:18px;padding:18px;max-width:1200px;margin:18px auto;width:calc(100% - 36px)}
+  @media (max-width:980px){ main{grid-template-columns:1fr;}}
+  /* left: portal */
+  .portal{background:var(--panel);border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+  .filters{display:flex;gap:8px;margin-bottom:12px;overflow:auto;padding-bottom:6px}
+  .chip{padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .chip.active{color:var(--accent);border-color:rgba(56,189,248,0.18);background:linear-gradient(180deg, rgba(56,189,248,0.02), transparent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .card{
+    height:var(--btn-h);display:flex;flex-direction:row;align-items:center;gap:12px;padding:12px;border-radius:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+    border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform .14s,box-shadow .14s,border-color .14s;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.6);border-color:rgba(56,189,248,0.12)}
+  .icon{width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;font-size:26px}
+  .meta{display:flex;flex-direction:column;gap:2px}
+  .name{font-weight:600;font-size:15px}
+  .tag{font-size:12px;color:var(--muted)}
+  /* right: info / tycoon panel */
+  .panel{background:var(--panel);border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,0.03);height:100%;display:flex;flex-direction:column;gap:12px}
+  .panel h3{margin:0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em}
+  .tycoon-overview{display:flex;flex-direction:column;gap:8px}
+  .stat-row{display:flex;gap:8px}
+  .stat{flex:1;background:var(--card);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);text-align:center}
+  .stat .v{font-weight:700;font-size:18px}
+  .achievements{display:flex;flex-wrap:wrap;gap:6px}
+  .ach{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:12px;color:var(--muted)}
+  /* overlay fullscreen */
+  .overlay{position:fixed;inset:0;background:rgba(2,6,23,0.98);display:none;flex-direction:column;z-index:80}
+  .overlay.active{display:flex}
+  .overlay .bar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .overlay .bar .title{font-weight:700}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;color:var(--muted);cursor:pointer}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#0ea5e9);color:#021124;border:none;box-shadow:0 10px 30px rgba(56,189,248,0.12)}
+  .canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:18px}
+  canvas{background:#000;border-radius:12px;max-width:100%;max-height:100%;display:block}
+  /* small helper */
+  .muted{color:var(--muted);font-size:13px}
+  footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
 </style>
 </head>
-
 <body>
+  <header><div class="title">🎮 Portal</div></header>
 
-<header>🎮 Games</header>
+  <main>
+    <section class="portal" id="portal">
+      <div class="filters" id="filters">
+        <div class="chip active" data-filter="all">Alle</div>
+        <div class="chip" data-filter="retro">Retro</div>
+        <div class="chip" data-filter="arcade">Arcade</div>
+        <div class="chip" data-filter="skill">Skill</div>
+        <div class="chip" data-filter="idle">Idle</div>
+      </div>
 
-<!-- GAME MENU -->
-<div id="gameMenu"></div>
+      <div class="grid" id="grid"></div>
+    </section>
 
-<!-- FULLSCREEN GAME -->
-<div id="gameScreen">
-    <div id="topBar">
-        <div id="gameTitle">Game</div>
-        <div id="backBtn">⬅</div>
+    <aside class="panel">
+      <h3>Tycoon (Live)</h3>
+      <div class="tycoon-overview" id="tycoonPanel">
+        <div class="stat-row">
+          <div class="stat"><div class="muted">Money</div><div class="v" id="tyMoney">0</div></div>
+          <div class="stat"><div class="muted">Passive</div><div class="v" id="tyPassive">0/s</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><div class="muted">Multiplier</div><div class="v" id="tyMult">x1.0</div></div>
+          <div class="stat"><div class="muted">Prestige</div><div class="v" id="tyPrestige">0</div></div>
+        </div>
+        <div>
+          <div class="muted">Achievements</div>
+          <div class="achievements" id="tyAch"></div>
+        </div>
+      </div>
+
+      <h3>Quick</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="btnMenu">Menü</button>
+        <button class="btn primary" id="btnOpenTycoon">Tycoon</button>
+      </div>
+
+      <div style="flex:1"></div>
+      <div class="muted" style="text-align:center">Touch & Keyboard ready</div>
+    </aside>
+  </main>
+
+  <div class="overlay" id="overlay">
+    <div class="bar">
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="btn" id="backBtn">⬅</button>
+        <div class="title" id="overlayTitle">Game</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="muted" id="overlayMode">Touch</div>
+        <button class="btn" id="restartBtn">⟳</button>
+      </div>
     </div>
-    <canvas id="gameCanvas"></canvas>
-</div>
+    <div class="canvas-wrap">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+    </div>
+  </div>
+
+  <footer>Minimal UI • Tap a card to play</footer>
 
 <script>
-/* ===========================
-   GAME LIST (10 GAMES)
-=========================== */
-const games = [
-    { id:"snake",    name:"Snake",          icon:"🐍" },
-    { id:"flappy",   name:"Flappy",         icon:"🐤" },
-    { id:"pong",     name:"Pong",           icon:"🏓" },
-    { id:"breakout", name:"Breakout",       icon:"🧱" },
-    { id:"cardodge", name:"Car Dodge",      icon:"🚗" },
-    { id:"space",    name:"Space",          icon:"🚀" },
-    { id:"aim",      name:"Aim",            icon:"🎯" },
-    { id:"reaction", name:"Reaction",       icon:"⚡" },
-    { id:"memory",   name:"Memory",         icon:"🧠" },
-    { id:"clicker",  name:"Clicker",        icon:"💰" }
+/* =========================
+   Data: 10 games (minimal UI)
+   Each game: id, name, icon, category, factory function
+   ========================= */
+const GAME_DEFS = [
+  {id:'snake', name:'Snake', icon:'🐍', cat:'retro'},
+  {id:'flappy', name:'Flappy', icon:'🐤', cat:'retro'},
+  {id:'pong', name:'Pong', icon:'🏓', cat:'arcade'},
+  {id:'breakout', name:'Breakout', icon:'🧱', cat:'arcade'},
+  {id:'cardodge', name:'Car', icon:'🚗', cat:'arcade'},
+  {id:'space', name:'Space', icon:'🚀', cat:'arcade'},
+  {id:'aim', name:'Aim', icon:'🎯', cat:'skill'},
+  {id:'reaction', name:'React', icon:'⚡', cat:'skill'},
+  {id:'memory', name:'Memory', icon:'🧠', cat:'skill'},
+  {id:'clicker', name:'Clicker', icon:'💰', cat:'idle'}
 ];
 
-/* MENU RENDER */
-const menu = document.getElementById("gameMenu");
-games.forEach(g=>{
-    let b=document.createElement("div");
-    b.className="gameBtn";
-    b.innerHTML=`<span>${g.icon}</span>${g.name}`;
-    b.onclick=()=>startGame(g.id, g.name + " " + g.icon);
-    menu.appendChild(b);
+/* ====== UI refs ====== */
+const grid = document.getElementById('grid');
+const filters = document.getElementById('filters');
+const overlay = document.getElementById('overlay');
+const overlayTitle = document.getElementById('overlayTitle');
+const overlayMode = document.getElementById('overlayMode');
+const backBtn = document.getElementById('backBtn');
+const restartBtn = document.getElementById('restartBtn');
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const tyMoney = document.getElementById('tyMoney');
+const tyPassive = document.getElementById('tyPassive');
+const tyMult = document.getElementById('tyMult');
+const tyPrestige = document.getElementById('tyPrestige');
+const tyAch = document.getElementById('tyAch');
+
+let currentFilter = 'all';
+let currentGameId = null;
+let currentGameInstance = null;
+let raf = null;
+
+/* ====== Render portal cards ====== */
+function renderCards(){
+  grid.innerHTML = '';
+  const list = GAME_DEFS.filter(g => currentFilter === 'all' || g.cat === currentFilter);
+  list.forEach(g=>{
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.dataset.id = g.id;
+    c.innerHTML = `<div class="icon">${g.icon}</div><div class="meta"><div class="name">${g.name}</div><div class="tag">${g.cat.toUpperCase()}</div></div>`;
+    c.addEventListener('click', ()=>openGame(g.id));
+    grid.appendChild(c);
+  });
+}
+
+/* ====== Filter handling ====== */
+filters.addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+  chip.classList.add('active');
+  currentFilter = chip.dataset.filter || 'all';
+  renderCards();
 });
 
-/* FULLSCREEN HANDLING */
-const screen = document.getElementById("gameScreen");
-const title = document.getElementById("gameTitle");
-const back = document.getElementById("backBtn");
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+/* ====== Overlay controls ====== */
+backBtn.addEventListener('click', closeGame);
+restartBtn.addEventListener('click', ()=>{ if(currentGameInstance && currentGameInstance.restart) currentGameInstance.restart(); });
 
-back.onclick = ()=>closeGame();
-
-function resizeCanvas(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 50;
+/* ====== Resize canvas to fit container while keeping aspect ratio ====== */
+function fitCanvas(){
+  const wrap = canvas.parentElement.getBoundingClientRect();
+  const maxW = wrap.width - 24;
+  const maxH = wrap.height - 24;
+  const aspect = 16/9;
+  let w = maxW, h = w / aspect;
+  if(h > maxH){ h = maxH; w = h * aspect; }
+  canvas.style.width = Math.floor(w) + 'px';
+  canvas.style.height = Math.floor(h) + 'px';
+  // set internal resolution for crispness
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-window.onresize = resizeCanvas;
+window.addEventListener('resize', fitCanvas);
 
-let currentGame = null;
-
-function startGame(id, name){
-    screen.style.display="flex";
-    title.innerText=name;
-    resizeCanvas();
-
-    currentGame = null;
-    if(id==="snake")    loadSnake();
-    if(id==="flappy")   loadFlappy();
-    if(id==="pong")     loadPong();
-    if(id==="breakout") loadBreakout();
-    if(id==="cardodge") loadCarDodge();
-    if(id==="space")    loadSpace();
-    if(id==="aim")      loadAim();
-    if(id==="reaction") loadReaction();
-    if(id==="memory")   loadMemory();
-    if(id==="clicker")  loadClicker();
+/* ====== Open / Close game ====== */
+function openGame(id){
+  currentGameId = id;
+  overlay.classList.add('active');
+  overlayTitle.textContent = GAME_DEFS.find(g=>g.id===id).name;
+  overlayMode.textContent = 'Touch';
+  fitCanvas();
+  // create instance
+  if(currentGameInstance && currentGameInstance.destroy) currentGameInstance.destroy();
+  currentGameInstance = createGameInstance(id, canvas, ctx, onTycoonUpdate);
+  if(currentGameInstance && currentGameInstance.start) currentGameInstance.start();
+  // start loop
+  if(raf) cancelAnimationFrame(raf);
+  let last = performance.now();
+  function loop(t){
+    const dt = (t - last) / 1000;
+    last = t;
+    if(currentGameInstance && currentGameInstance.update) currentGameInstance.update(dt);
+    if(currentGameInstance && currentGameInstance.render) currentGameInstance.render();
+    raf = requestAnimationFrame(loop);
+  }
+  raf = requestAnimationFrame(loop);
 }
 
 function closeGame(){
-    currentGame = null;
-    screen.style.display="none";
+  overlay.classList.remove('active');
+  if(raf) cancelAnimationFrame(raf);
+  raf = null;
+  if(currentGameInstance && currentGameInstance.destroy) currentGameInstance.destroy();
+  currentGameInstance = null;
+  currentGameId = null;
 }
 
-/* ===========================
-   SNAKE
-=========================== */
-function loadSnake(){
-    let grid=20;
-    let snake=[{x:5,y:5}];
-    let dir={x:1,y:0};
-    let food={x:10,y:10};
+/* ====== Tycoon UI bridge (live updates from tycoon game) ====== */
+function onTycoonUpdate(state){
+  if(!state) return;
+  tyMoney.textContent = Math.floor(state.money).toLocaleString('de-DE');
+  tyPassive.textContent = (state.passive || 0).toFixed(1) + '/s';
+  tyMult.textContent = 'x' + (state.multiplier || 1).toFixed(2);
+  tyPrestige.textContent = (state.prestige || 0);
+  // achievements
+  tyAch.innerHTML = '';
+  (state.achievements || []).forEach(a=>{
+    const s = document.createElement('div'); s.className='ach'; s.textContent = a; tyAch.appendChild(s);
+  });
+}
 
-    document.onkeydown=e=>{
-        if(e.key==="ArrowUp"   && dir.y!==1)  dir={x:0,y:-1};
-        if(e.key==="ArrowDown" && dir.y!==-1) dir={x:0,y:1};
-        if(e.key==="ArrowLeft" && dir.x!==1)  dir={x:-1,y:0};
-        if(e.key==="ArrowRight"&& dir.x!==-1) dir={x:1,y:0};
-    };
+/* ====== Game factory: returns object with start/update/render/destroy/restart ====== */
+function createGameInstance(id, canvas, ctx, tycoonCallback){
+  // small helper: clear
+  function clear(){ ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height); }
 
-    canvas.ontouchstart = e=>{
-        let t=e.touches[0];
-        let cx=t.clientX, cy=t.clientY;
-        let mx=canvas.width/2, my=canvas.height/2;
-        if(Math.abs(cx-mx)>Math.abs(cy-my)){
-            dir = cx>mx ? {x:1,y:0} : {x:-1,y:0};
+  if(id === 'snake'){
+    // Snake: grid-based, touch swipe & arrows
+    const grid = 24;
+    const cols = Math.floor(canvas.width / grid);
+    const rows = Math.floor(canvas.height / grid);
+    let snake = [{x:5,y:5}];
+    let dir = {x:1,y:0};
+    let food = {x:10,y:10};
+    let speed = 8; // steps per second
+    let acc = 0;
+    let dead = false;
+
+    function spawnFood(){
+      food = {x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows)};
+    }
+
+    function onKey(e){
+      if(e.key === 'ArrowUp' && dir.y !== 1) dir = {x:0,y:-1};
+      if(e.key === 'ArrowDown' && dir.y !== -1) dir = {x:0,y:1};
+      if(e.key === 'ArrowLeft' && dir.x !== 1) dir = {x:-1,y:0};
+      if(e.key === 'ArrowRight' && dir.x !== -1) dir = {x:1,y:0};
+      if(e.key === 'r') restart();
+    }
+
+    let touchStart = null;
+    function onTouchStart(e){
+      const t = e.touches[0];
+      touchStart = {x:t.clientX, y:t.clientY};
+    }
+    function onTouchMove(e){
+      if(!touchStart) return;
+      const t = e.touches[0];
+      const dx = t.clientX - touchStart.x;
+      const dy = t.clientY - touchStart.y;
+      if(Math.abs(dx) > 20 || Math.abs(dy) > 20){
+        if(Math.abs(dx) > Math.abs(dy)){
+          dir = dx > 0 ? {x:1,y:0} : {x:-1,y:0};
         } else {
-            dir = cy>my ? {x:0,y:1} : {x:0,y:-1};
+          dir = dy > 0 ? {x:0,y:1} : {x:0,y:-1};
         }
-    };
+        touchStart = null;
+      }
+    }
+    function onTouchEnd(){ touchStart = null; }
 
-    currentGame = function loop(){
-        if(!currentGame) return;
-
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        let head={x:snake[0].x+dir.x, y:snake[0].y+dir.y};
+    function start(){ window.addEventListener('keydown', onKey); canvas.addEventListener('touchstart', onTouchStart,{passive:true}); canvas.addEventListener('touchmove', onTouchMove,{passive:true}); canvas.addEventListener('touchend', onTouchEnd,{passive:true}); }
+    function update(dt){
+      if(dead) return;
+      acc += dt;
+      const step = 1 / speed;
+      while(acc >= step){
+        acc -= step;
+        const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+        // wrap-around
+        if(head.x < 0) head.x = cols - 1;
+        if(head.y < 0) head.y = rows - 1;
+        if(head.x >= cols) head.x = 0;
+        if(head.y >= rows) head.y = 0;
+        // collision
+        if(snake.some(s => s.x === head.x && s.y === head.y)){ dead = true; break; }
         snake.unshift(head);
-
-        if(head.x===food.x && head.y===food.y){
-            food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)};
-        } else snake.pop();
-
-        ctx.fillStyle="lime";
-        snake.forEach(s=>ctx.fillRect(s.x*grid,s.y*grid,grid-1,grid-1));
-
-        ctx.fillStyle="red";
-        ctx.fillRect(food.x*grid,food.y*grid,grid-1,grid-1);
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   FLAPPY
-=========================== */
-function loadFlappy(){
-    let y=canvas.height/2;
-    let v=0;
-    let pipes=[];
-    let gap=120;
-    let frame=0;
-
-    function tap(){ v=-8; }
-    document.onkeydown=e=>{ if(e.key===" "){tap();} };
-    canvas.ontouchstart = ()=>tap();
-
-    currentGame = function loop(){
-        if(!currentGame) return;
-
-        frame++;
-        ctx.fillStyle="#020617";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        if(frame%80===0){
-            let top = 50+Math.random()*(canvas.height-200);
-            pipes.push({x:canvas.width, top:top});
-        }
-
-        v+=0.5;
-        y+=v;
-
-        ctx.fillStyle="yellow";
-        ctx.fillRect(80,y,24,24);
-
-        ctx.fillStyle="#22c55e";
-        pipes.forEach(p=>{
-            p.x-=3;
-            ctx.fillRect(p.x,0,40,p.top-gap/2);
-            ctx.fillRect(p.x,p.top+gap/2,40,canvas.height);
-        });
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   PONG
-=========================== */
-function loadPong(){
-    let py=canvas.height/2-40;
-    let bx=canvas.width/2, by=canvas.height/2;
-    let dx=4, dy=3;
-
-    canvas.onmousemove = e=>{
-        let rect=canvas.getBoundingClientRect();
-        py = e.clientY-rect.top-40;
-    };
-    canvas.ontouchmove = e=>{
-        let t=e.touches[0];
-        let rect=canvas.getBoundingClientRect();
-        py = t.clientY-rect.top-40;
-    };
-
-    currentGame = function loop(){
-        if(!currentGame) return;
-
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        bx+=dx; by+=dy;
-        if(by<0||by>canvas.height) dy*=-1;
-        if(bx<20 && by>py && by<py+80) dx*=-1;
-        if(bx>canvas.width) {bx=canvas.width/2;by=canvas.height/2;}
-
-        ctx.fillStyle="white";
-        ctx.fillRect(10,py,10,80);
-        ctx.fillRect(bx-5,by-5,10,10);
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   BREAKOUT
-=========================== */
-function loadBreakout(){
-    let bx=canvas.width/2, by=canvas.height/2;
-    let dx=3, dy=-3;
-    let pw=80, px=canvas.width/2-pw/2;
-    let bricks=[];
-    let rows=4, cols=8, bw=canvas.width/cols, bh=20;
-
-    for(let r=0;r<rows;r++){
-        for(let c=0;c<cols;c++){
-            bricks.push({x:c*bw,y:60+r*bh,w:bw-2,h:bh-2,alive:true});
-        }
+        if(head.x === food.x && head.y === food.y){ spawnFood(); } else snake.pop();
+      }
     }
+    function render(){
+      clear();
+      // draw grid-ish background
+      ctx.fillStyle = '#071026';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      // snake
+      ctx.fillStyle = '#22c55e';
+      snake.forEach(s => ctx.fillRect(s.x*grid, s.y*grid, grid-1, grid-1));
+      // food
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(food.x*grid, food.y*grid, grid-1, grid-1);
+      if(dead){
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(0, canvas.height/2 - 40, canvas.width, 80);
+        ctx.fillStyle = '#f97316';
+        ctx.font = '20px system-ui';
+        ctx.fillText('Game Over — R zum Neustart', 20, canvas.height/2 + 8);
+      }
+    }
+    function restart(){ snake = [{x:5,y:5}]; dir = {x:1,y:0}; spawnFood(); dead = false; acc = 0; }
+    function destroy(){ window.removeEventListener('keydown', onKey); canvas.removeEventListener('touchstart', onTouchStart); canvas.removeEventListener('touchmove', onTouchMove); canvas.removeEventListener('touchend', onTouchEnd); }
 
-    canvas.onmousemove = e=>{
-        let rect=canvas.getBoundingClientRect();
-        px = e.clientX-rect.left-pw/2;
-    };
-    canvas.ontouchmove = e=>{
-        let t=e.touches[0];
-        let rect=canvas.getBoundingClientRect();
-        px = t.clientX-rect.left-pw/2;
-    };
+    return {start, update, render, destroy, restart};
+  }
 
-    currentGame = function loop(){
-        if(!currentGame) return;
+  if(id === 'flappy'){
+    // Flappy: simple physics, pipes
+    let y = canvas.height/2, v = 0;
+    const gravity = 900;
+    const flap = -320;
+    const birdX = Math.max(60, canvas.width * 0.12);
+    const pipes = [];
+    let timer = 0;
+    let score = 0;
+    let dead = false;
 
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
+    function tap(){ if(dead){ reset(); } else v = flap; }
+    function onKey(e){ if(e.key === ' '){ e.preventDefault(); tap(); } if(e.key === 'r') reset(); }
+    function reset(){ y = canvas.height/2; v = 0; pipes.length = 0; timer = 0; score = 0; dead = false; }
 
-        bx+=dx; by+=dy;
-        if(bx<0||bx>canvas.width) dx*=-1;
-        if(by<0) dy*=-1;
-        if(by>canvas.height){
-            bx=canvas.width/2;by=canvas.height/2;
+    function start(){ canvas.addEventListener('touchstart', tap, {passive:true}); window.addEventListener('keydown', onKey); }
+    function update(dt){
+      if(dead) return;
+      v += gravity * dt;
+      y += v * dt;
+      timer += dt;
+      if(timer > 1.2){ timer = 0; const gap = 140; const mid = 80 + Math.random()*(canvas.height - 200); pipes.push({x: canvas.width + 40, mid, gap}); }
+      for(const p of pipes) p.x -= 160 * dt;
+      // collision
+      if(y < 0 || y > canvas.height) dead = true;
+      for(const p of pipes){
+        if(birdX > p.x - 20 && birdX < p.x + 40){
+          if(y < p.mid - p.gap/2 || y > p.mid + p.gap/2) dead = true;
         }
-
-        if(by>canvas.height-30 && bx>px && bx<px+pw) dy*=-1;
-
-        bricks.forEach(b=>{
-            if(!b.alive) return;
-            if(bx>b.x && bx<b.x+b.w && by>b.y && by<b.y+b.h){
-                b.alive=false;
-                dy*=-1;
-            }
-        });
-
-        ctx.fillStyle="#38bdf8";
-        ctx.fillRect(px,canvas.height-20,pw,10);
-
-        ctx.fillStyle="#f97316";
-        ctx.fillRect(bx-5,by-5,10,10);
-
-        ctx.fillStyle="#e5e7eb";
-        bricks.forEach(b=>{
-            if(b.alive) ctx.fillRect(b.x,b.y,b.w,b.h);
-        });
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   CAR DODGE
-=========================== */
-function loadCarDodge(){
-    let x=canvas.width/2;
-    let obs=[];
-
-    document.onkeydown=e=>{
-        if(e.key==="ArrowLeft") x-=20;
-        if(e.key==="ArrowRight") x+=20;
-    };
-    canvas.ontouchmove = e=>{
-        let t=e.touches[0];
-        let rect=canvas.getBoundingClientRect();
-        x = t.clientX-rect.left;
-    };
-
-    currentGame = function loop(){
-        if(!currentGame) return;
-
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        if(Math.random()<0.05) obs.push({x:Math.random()*canvas.width,y:-20});
-
-        ctx.fillStyle="#22c55e";
-        ctx.fillRect(x-10,canvas.height-40,20,30);
-
-        ctx.fillStyle="#f97316";
-        obs.forEach(o=>{
-            o.y+=4;
-            ctx.fillRect(o.x-10,o.y-10,20,20);
-        });
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   SPACE SHOOTER
-=========================== */
-function loadSpace(){
-    let x=canvas.width/2;
-    let bullets=[];
-    let stars=[];
-    for(let i=0;i<60;i++){
-        stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height});
+        if(!p.scored && p.x + 40 < birdX){ p.scored = true; score++; }
+      }
+      while(pipes.length && pipes[0].x < -80) pipes.shift();
     }
+    function render(){
+      clear();
+      // sky
+      ctx.fillStyle = '#071026'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      // pipes
+      ctx.fillStyle = '#16a34a';
+      pipes.forEach(p => {
+        ctx.fillRect(p.x, 0, 40, p.mid - p.gap/2);
+        ctx.fillRect(p.x, p.mid + p.gap/2, 40, canvas.height - (p.mid + p.gap/2));
+      });
+      // bird
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(birdX, y, 22, 18);
+      // score
+      ctx.fillStyle = '#e6eef8'; ctx.font = '18px system-ui'; ctx.fillText('' + score, 12, 28);
+      if(dead){
+        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, canvas.height/2 - 40, canvas.width, 80);
+        ctx.fillStyle = '#f97316'; ctx.font = '18px system-ui'; ctx.fillText('Game Over — Tap / Space to restart', 20, canvas.height/2 + 8);
+      }
+    }
+    function destroy(){ canvas.removeEventListener('touchstart', tap); window.removeEventListener('keydown', onKey); }
+    return {start, update, render, destroy, restart: reset};
+  }
 
-    document.onkeydown=e=>{
-        if(e.key==="ArrowLeft") x-=15;
-        if(e.key==="ArrowRight") x+=15;
-        if(e.key===" ") bullets.push({x:x,y:canvas.height-40});
-    };
-    canvas.ontouchmove = e=>{
-        let t=e.touches[0];
-        let rect=canvas.getBoundingClientRect();
-        x = t.clientX-rect.left;
-    };
-    canvas.ontouchstart = ()=>bullets.push({x:x,y:canvas.height-40});
+  if(id === 'pong'){
+    // Pong: simple single-player paddle
+    let paddleY = canvas.height/2 - 40;
+    let ball = {x: canvas.width/2, y: canvas.height/2, vx: 220, vy: 140, r: 8};
+    function onMove(e){ const rect = canvas.getBoundingClientRect(); paddleY = e.clientY - rect.top - 40; }
+    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); paddleY = t.clientY - rect.top - 40; }
+    function start(){ canvas.addEventListener('mousemove', onMove); canvas.addEventListener('touchmove', onTouch, {passive:true}); }
+    function update(dt){
+      ball.x += ball.vx * dt; ball.y += ball.vy * dt;
+      if(ball.y < ball.r || ball.y > canvas.height - ball.r) ball.vy *= -1;
+      if(ball.x - ball.r < 20 && ball.y > paddleY && ball.y < paddleY + 80 && ball.vx < 0) ball.vx *= -1;
+      if(ball.x > canvas.width - ball.r) ball.vx *= -1;
+      if(ball.x < -40){ ball.x = canvas.width/2; ball.y = canvas.height/2; ball.vx = 220; ball.vy = 140; }
+    }
+    function render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.fillRect(10, paddleY, 10, 80); ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fillStyle='#f97316'; ctx.fill(); }
+    function destroy(){ canvas.removeEventListener('mousemove', onMove); canvas.removeEventListener('touchmove', onTouch); }
+    return {start, update, render, destroy, restart(){ ball.x = canvas.width/2; ball.y = canvas.height/2; }};
+  }
 
-    currentGame = function loop(){
-        if(!currentGame) return;
+  if(id === 'breakout'){
+    // Breakout: simple bricks
+    const paddle = {w:120, x: canvas.width/2 - 60, y: canvas.height - 40};
+    let ball = {x: canvas.width/2, y: canvas.height/2, vx: 200, vy: -200, r: 8};
+    const bricks = [];
+    const rows = 5, cols = 8;
+    const bw = Math.floor(canvas.width / cols), bh = 20;
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) bricks.push({x:c*bw+4, y:60+r*(bh+6), w:bw-8, h:bh, alive:true});
+    function onMove(e){ const rect = canvas.getBoundingClientRect(); paddle.x = e.clientX - rect.left - paddle.w/2; }
+    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); paddle.x = t.clientX - rect.left - paddle.w/2; }
+    function start(){ canvas.addEventListener('mousemove', onMove); canvas.addEventListener('touchmove', onTouch, {passive:true}); }
+    function update(dt){
+      ball.x += ball.vx * dt; ball.y += ball.vy * dt;
+      if(ball.x < ball.r || ball.x > canvas.width - ball.r) ball.vx *= -1;
+      if(ball.y < ball.r) ball.vy *= -1;
+      if(ball.y > canvas.height + 40){ ball.x = canvas.width/2; ball.y = canvas.height/2; }
+      // paddle collision
+      if(ball.y + ball.r >= paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + paddle.w && ball.vy > 0) { ball.vy *= -1; const hit = (ball.x - (paddle.x + paddle.w/2)) / (paddle.w/2); ball.vx = 300 * hit; }
+      // bricks
+      for(const b of bricks){
+        if(!b.alive) continue;
+        if(ball.x > b.x && ball.x < b.x + b.w && ball.y - ball.r < b.y + b.h && ball.y + ball.r > b.y){ b.alive = false; ball.vy *= -1; break; }
+      }
+    }
+    function render(){ clear(); ctx.fillStyle='#38bdf8'; ctx.fillRect(paddle.x, paddle.y, paddle.w, 12); ctx.fillStyle='#f97316'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#e6eef8'; bricks.forEach(b=>{ if(b.alive) ctx.fillRect(b.x,b.y,b.w,b.h); }); }
+    function destroy(){ canvas.removeEventListener('mousemove', onMove); canvas.removeEventListener('touchmove', onTouch); }
+    return {start, update, render, destroy, restart(){ ball.x = canvas.width/2; ball.y = canvas.height/2; }};
+  }
 
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(id === 'cardodge'){
+    // Car Dodge: simple obstacles
+    let carX = canvas.width/2;
+    const obstacles = [];
+    function onKey(e){ if(e.key === 'ArrowLeft') carX -= 40; if(e.key === 'ArrowRight') carX += 40; }
+    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); carX = t.clientX - rect.left; }
+    function start(){ window.addEventListener('keydown', onKey); canvas.addEventListener('touchmove', onTouch, {passive:true}); }
+    function update(dt){
+      if(Math.random() < 0.06) obstacles.push({x: Math.random()*canvas.width, y: -40, speed: 120 + Math.random()*120});
+      obstacles.forEach(o => o.y += o.speed * dt);
+      while(obstacles.length && obstacles[0].y > canvas.height + 40) obstacles.shift();
+    }
+    function render(){ clear(); ctx.fillStyle='#22c55e'; ctx.fillRect(carX-18, canvas.height-70, 36, 50); ctx.fillStyle='#f97316'; obstacles.forEach(o=>ctx.fillRect(o.x-12,o.y,24,24)); }
+    function destroy(){ window.removeEventListener('keydown', onKey); canvas.removeEventListener('touchmove', onTouch); }
+    return {start, update, render, destroy, restart(){ obstacles.length = 0; }};
+  }
 
-        ctx.fillStyle="white";
-        stars.forEach(s=>{
-            s.y+=1;
-            if(s.y>canvas.height) s.y=0;
-            ctx.fillRect(s.x,s.y,2,2);
-        });
+  if(id === 'space'){
+    // Space shooter: player at bottom, shoot bullets
+    let shipX = canvas.width/2;
+    const bullets = [];
+    const enemies = [];
+    const stars = Array.from({length:80}, ()=>({x:Math.random()*canvas.width, y:Math.random()*canvas.height}));
+    function onKey(e){ if(e.key === 'ArrowLeft') shipX -= 20; if(e.key === 'ArrowRight') shipX += 20; if(e.key === ' ') bullets.push({x:shipX, y:canvas.height-60}); }
+    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); shipX = t.clientX - rect.left; bullets.push({x:shipX, y:canvas.height-60}); }
+    function start(){ window.addEventListener('keydown', onKey); canvas.addEventListener('touchstart', onTouch, {passive:true}); }
+    function update(dt){
+      if(Math.random() < 0.02) enemies.push({x:40 + Math.random()*(canvas.width-80), y:-20, vy: 40 + Math.random()*80, r: 12});
+      bullets.forEach(b => b.y -= 400 * dt);
+      enemies.forEach(e => e.y += e.vy * dt);
+      // collisions
+      bullets.forEach(b => enemies.forEach(e => { if(Math.hypot(b.x-e.x,b.y-e.y) < e.r+4){ e.dead = true; b.dead = true; } }));
+      // cleanup
+      for(let i = bullets.length-1;i>=0;i--) if(bullets[i].y < -20 || bullets[i].dead) bullets.splice(i,1);
+      for(let i = enemies.length-1;i>=0;i--) if(enemies[i].y > canvas.height+40 || enemies[i].dead) enemies.splice(i,1);
+    }
+    function render(){ clear(); ctx.fillStyle='#0ea5e9'; stars.forEach(s=>{ s.y += 10 * 1/60; if(s.y > canvas.height) s.y = 0; ctx.fillRect(s.x, s.y, 1,1); }); ctx.fillStyle='#38bdf8'; ctx.beginPath(); ctx.moveTo(shipX, canvas.height-40); ctx.lineTo(shipX-12, canvas.height-10); ctx.lineTo(shipX+12, canvas.height-10); ctx.closePath(); ctx.fill(); ctx.fillStyle='#facc15'; bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-10,4,10)); ctx.fillStyle='#f97316'; enemies.forEach(e=>{ ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); }); }
+    function destroy(){ window.removeEventListener('keydown', onKey); canvas.removeEventListener('touchstart', onTouch); }
+    return {start, update, render, destroy, restart(){ bullets.length = 0; enemies.length = 0; }};
+  }
 
-        ctx.fillStyle="#38bdf8";
-        ctx.fillRect(x-12,canvas.height-40,24,30);
+  if(id === 'aim'){
+    // Aim trainer: click targets
+    let target = spawnTarget();
+    let score = 0;
+    function spawnTarget(){ return {x: 40 + Math.random()*(canvas.width-80), y: 60 + Math.random()*(canvas.height-120), r: 22}; }
+    function hit(x,y){ if(Math.hypot(x-target.x,y-target.y) <= target.r){ score++; target = spawnTarget(); } }
+    function onClick(e){ hit(e.offsetX, e.offsetY); }
+    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); hit(t.clientX-rect.left, t.clientY-rect.top); }
+    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onTouch, {passive:true}); }
+    function update(dt){}
+    function render(){ clear(); ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(target.x,target.y,target.r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#e6eef8'; ctx.font='18px system-ui'; ctx.fillText('Score: '+score, 12, 28); }
+    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onTouch); }
+    return {start, update, render, destroy, restart(){ score = 0; target = spawnTarget(); }};
+  }
 
-        ctx.fillStyle="#facc15";
-        bullets.forEach(b=>{
-            b.y-=6;
-            ctx.fillRect(b.x-2,b.y-10,4,10);
-        });
+  if(id === 'reaction'){
+    // Reaction: wait random, then measure
+    let waiting = true, startTime = 0, lastResult = null;
+    function schedule(){ waiting = true; lastResult = null; setTimeout(()=>{ waiting = false; startTime = performance.now(); }, 1000 + Math.random()*2500); }
+    function onClick(){ if(!waiting){ lastResult = Math.round(performance.now() - startTime) + ' ms'; schedule(); } else { lastResult = 'Too early'; schedule(); } }
+    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onClick, {passive:true}); schedule(); }
+    function update(dt){}
+    function render(){ clear(); ctx.fillStyle = waiting ? '#111827' : '#16a34a'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6eef8'; ctx.font='28px system-ui'; ctx.fillText(lastResult || (waiting ? 'Warte...' : 'Klick!'), 20, 60); }
+    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onClick); }
+    return {start, update, render, destroy, restart: schedule};
+  }
 
-        requestAnimationFrame(loop);
-    };
-    currentGame();
+  if(id === 'memory'){
+    // Memory: show numbers then prompt (simple)
+    let seq = [];
+    let index = 0;
+    let showing = false;
+    let timer = 0;
+    function newRound(){ seq.push(Math.floor(Math.random()*9)+1); index = 0; showing = true; timer = 0; }
+    function onClick(){ if(!showing){ newRound(); } }
+    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onClick, {passive:true}); newRound(); }
+    function update(dt){ if(showing){ timer += dt; if(timer > 0.9){ index++; timer = 0; if(index >= seq.length) showing = false; } } }
+    function render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.font='20px system-ui'; if(showing){ ctx.font='64px system-ui'; ctx.fillText(seq[index] || '', canvas.width/2 - 12, canvas.height/2); } else { ctx.fillText('Tap to show next', 20, 40); } }
+    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onClick); }
+    return {start, update, render, destroy, restart: newRound};
+  }
+
+  if(id === 'clicker'){
+    // Clicker: simple idle with tycoon callback
+    let money = 0, clickPower = 1, passive = 0, multiplier = 1, prestige = 0;
+    let upgrades = [{name:'+1', cost:10, bought:false}, {name:'Auto', cost:100, bought:false}];
+    function onClick(){ money += clickPower * multiplier; }
+    function onKey(e){ if(e.key === ' ') onClick(); if(e.key === 'u'){ const up = upgrades.find(u=>!u.bought); if(up && money >= up.cost){ money -= up.cost; up.bought = true; if(up.name === '+1') clickPower += 1; if(up.name === 'Auto') passive += 0.5; } } }
+    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onClick, {passive:true}); window.addEventListener('keydown', onKey); }
+    let last = performance.now();
+    function update(dt){
+      money += passive * multiplier * dt;
+      // report to tycoon panel
+      tycoonCallback && tycoonCallback({money, passive, multiplier, prestige, achievements: upgrades.filter(u=>u.bought).map(u=>u.name), clickPower});
+    }
+    function render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.font='28px system-ui'; ctx.fillText('€ ' + Math.floor(money), 20, 50); ctx.font='16px system-ui'; ctx.fillText('Tap / Space to earn', 20, 90); ctx.fillText('U = buy upgrade', 20, 120); upgrades.forEach((u,i)=>{ ctx.fillStyle = u.bought ? '#4ade80' : '#9ca3af'; ctx.fillText(`${u.name} ${u.bought ? '✓' : u.cost+'$'}`, 20, 160 + i*26); }); }
+    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onClick); window.removeEventListener('keydown', onKey); }
+    return {start, update, render, destroy, restart(){ money = 0; passive = 0; clickPower = 1; upgrades.forEach(u=>u.bought=false); }};
+  }
+
+  // fallback: blank
+  return {
+    start(){},
+    update(){},
+    render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.font='20px system-ui'; ctx.fillText('No game', 20, 40); },
+    destroy(){},
+    restart(){}
+  };
 }
 
-/* ===========================
-   AIM TRAINER
-=========================== */
-function loadAim(){
-    let target={x:200,y:200,r:25};
-    let score=0;
+/* ====== Init ====== */
+renderCards();
+fitCanvas();
 
-    function newTarget(){
-        target.x = 40+Math.random()*(canvas.width-80);
-        target.y = 60+Math.random()*(canvas.height-120);
-    }
+/* ====== Quick open tycoon button ====== */
+document.getElementById('btnOpenTycoon').addEventListener('click', ()=>openGame('clicker'));
 
-    function hit(x,y){
-        let dx=x-target.x;
-        let dy=y-target.y;
-        if(Math.sqrt(dx*dx+dy*dy)<target.r){
-            score++;
-            newTarget();
-        }
-    }
+/* ====== Keyboard: ESC to close overlay ====== */
+window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && overlay.classList.contains('active')) closeGame(); });
 
-    canvas.onclick = e=>hit(e.offsetX,e.offsetY);
-    canvas.ontouchstart = e=>{
-        let t=e.touches[0];
-        let rect=canvas.getBoundingClientRect();
-        hit(t.clientX-rect.left,t.clientY-rect.top);
-    };
-
-    currentGame = function loop(){
-        if(!currentGame) return;
-
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        ctx.fillStyle="white";
-        ctx.font="20px Arial";
-        ctx.fillText(score,20,30);
-
-        ctx.beginPath();
-        ctx.arc(target.x,target.y,target.r,0,Math.PI*2);
-        ctx.fillStyle="#ef4444";
-        ctx.fill();
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   REACTION
-=========================== */
-function loadReaction(){
-    let waiting=true;
-    let startTime=0;
-    let msg="...";
-
-    function start(){
-        waiting=true;
-        msg="...";
-        ctx.fillStyle="black";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        setTimeout(()=>{
-            waiting=false;
-            startTime=performance.now();
-            msg="GO!";
-        },1000+Math.random()*2000);
-    }
-
-    canvas.onclick = ()=>{
-        if(!waiting){
-            let t=performance.now()-startTime;
-            msg=t.toFixed(0)+"ms";
-            setTimeout(start,1000);
-        }
-    };
-    canvas.ontouchstart = canvas.onclick;
-
-    start();
-
-    currentGame = function loop(){
-        if(!currentGame) return;
-
-        ctx.fillStyle=waiting?"#111827":"#16a34a";
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        ctx.fillStyle="white";
-        ctx.font="40px Arial";
-        ctx.fillText(msg,20,60);
-
-        requestAnimationFrame(loop);
-    };
-    currentGame();
-}
-
-/* ===========================
-   MEMORY
-=========================== */
-function loadMemory(){
-    let nums=[1,2,3,4,5].sort(()=>Math.random()-0.5);
-    let index=0;
-    let show=true;
-    let timer=0;
-
-    canvas.onclick = ()=>{
-        if(!show){
+/* ====== Prevent accidental scrolling on touch while playing overlay ====== */
+overlay.addEventListener('touchmove', (e)=>{ if(overlay.classList.contains('active')) e.preventDefault(); }, {passive:false});
+</script>
+</body>
+</html>
