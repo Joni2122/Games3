@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>3D Runner — Single Game</title>
+<title>3D Lane Runner — Single Game</title>
 <style>
   :root{
     --bg:#071026;
@@ -12,238 +12,164 @@
     --muted:#9ca3af;
     --white:#e6eef8;
   }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071026,#020617);color:var(--white);-webkit-font-smoothing:antialiased}
-  #ui {
-    position: absolute;
-    left: 16px;
-    top: 16px;
-    z-index: 30;
-    display:flex;
-    gap:12px;
-    align-items:center;
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071026,#020617);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--white);-webkit-font-smoothing:antialiased}
+  /* full-screen canvas only */
+  canvas{display:block;width:100vw;height:100vh;touch-action:none}
+  /* minimal HUD */
+  .hud{
+    position:fixed;left:16px;top:16px;z-index:40;display:flex;gap:12px;align-items:center;
   }
-  .panel {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.04);
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size:14px;
-    color:var(--white);
-    display:flex;
-    gap:10px;
-    align-items:center;
+  .pill{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:999px;font-weight:600}
+  .centerMsg{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:40;
+    background:rgba(2,6,23,0.9);border:1px solid rgba(255,255,255,0.04);padding:18px 22px;border-radius:12px;text-align:center;
   }
-  #score { font-weight:700; font-size:16px; }
-  #startBtn, #restartBtn {
-    background: linear-gradient(90deg,var(--accent),#0ea5e9);
-    color:#021124;
-    border:none;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:700;
+  .btn{
+    background:linear-gradient(90deg,var(--accent),#0ea5e9);color:#021124;border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;
   }
-  #hud {
-    position: absolute;
-    right: 16px;
-    top: 16px;
-    z-index: 30;
-    display:flex;
-    gap:8px;
-    align-items:center;
+  .controls{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:40;display:flex;gap:12px;
   }
-  #message {
-    position: absolute;
-    left:50%;
-    top:50%;
-    transform: translate(-50%,-50%);
-    z-index:40;
-    background: rgba(2,6,23,0.9);
-    border:1px solid rgba(255,255,255,0.04);
-    padding:18px 22px;
-    border-radius:12px;
-    text-align:center;
-    display:none;
-  }
-  #message h1{margin:0 0 8px 0;font-size:20px}
-  #controls {
-    position: absolute;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%);
-    z-index: 30;
-    display:flex;
-    gap:12px;
-  }
-  .touchBtn {
-    width:72px;height:72px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);
-    display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--white);user-select:none;
-    -webkit-user-select:none;
-  }
-  canvas{display:block;width:100vw;height:100vh}
-  /* small instructions */
-  #footerNote { position: absolute; left: 16px; bottom: 16px; color:var(--muted); font-size:12px; z-index:30 }
+  .touchBtn{width:72px;height:72px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--white);user-select:none}
+  .note{position:fixed;left:16px;bottom:16px;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
-  <div id="ui">
-    <div class="panel">Score: <span id="score">0</span></div>
-    <div class="panel">Speed: <span id="speed">1.0x</span></div>
-    <button id="startBtn" class="panel">Start</button>
-    <button id="restartBtn" class="panel" style="display:none">Restart</button>
+  <canvas id="gl"></canvas>
+
+  <div class="hud">
+    <div class="pill" id="score">Score: 0</div>
+    <div class="pill" id="speed">Speed: 1.00x</div>
+    <div class="pill" id="lives">Lives: 3</div>
   </div>
 
-  <div id="hud" class="panel">Lives: <span id="lives">3</span></div>
-
-  <div id="message">
-    <h1 id="msgTitle">3D Runner</h1>
-    <div id="msgText">Tippe Start für ein schnelles 3D-Spiel. Steuerung: Links/Rechts oder Touch-Buttons.</div>
-    <div style="margin-top:12px">
-      <button id="msgStart" style="background:var(--accent);border:none;padding:8px 12px;border-radius:8px;cursor:pointer">Start</button>
-    </div>
+  <div class="centerMsg" id="menu">
+    <div style="font-size:20px;font-weight:800;margin-bottom:8px">3D Lane Runner</div>
+    <div style="color:var(--muted);margin-bottom:14px">Swipe / Touch / ← → / A D • Jump: ↑ / W / Space</div>
+    <div><button class="btn" id="startBtn">Start</button></div>
   </div>
 
-  <div id="controls">
-    <div id="leftBtn" class="touchBtn">◀</div>
-    <div id="jumpBtn" class="touchBtn">▲</div>
-    <div id="rightBtn" class="touchBtn">▶</div>
+  <div class="controls" id="controls">
+    <div class="touchBtn" id="leftBtn">◀</div>
+    <div class="touchBtn" id="jumpBtn">▲</div>
+    <div class="touchBtn" id="rightBtn">▶</div>
   </div>
 
-  <div id="footerNote">Touch & Keyboard supported • WASD / Arrow keys</div>
-
-  <canvas id="glcanvas"></canvas>
+  <div class="note">Touch & Keyboard</div>
 
 <script>
-/*
-  3D Runner — Single-file game using WebGL2
-  - Simple 3D scene with perspective camera
-  - Player is a 3D cube that can move left/right and jump
-  - Obstacles are 3D boxes spawned ahead; player must avoid
-  - Basic lighting (Lambert) in shader
-  - Touch and keyboard controls
-  - Score, speed scaling, lives
-  - Clean, commented, modular code
+/* 3D Lane Runner — single file
+   - WebGL2, low‑poly character built from cubes
+   - 3 lanes, smooth lane switching
+   - obstacles spawn ahead and move toward player
+   - touch + keyboard controls
+   - minimal, polished visuals and UI
 */
 
-/* -------------------------
-   Utilities
-   ------------------------- */
-function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-function rand(min,max){ return Math.random()*(max-min)+min; }
-
-/* -------------------------
-   WebGL helpers
-   ------------------------- */
-const canvas = document.getElementById('glcanvas');
+/* -------------------- WebGL setup -------------------- */
+const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl2', { antialias: true });
+if(!gl){ alert('WebGL2 wird benötigt. Bitte modernen Browser verwenden.'); throw 'no-webgl2'; }
 
-if(!gl){
-  alert('WebGL2 wird benötigt. Bitte einen modernen Browser verwenden.');
-}
-
-// resize canvas to device pixels
-function resizeCanvasToDisplaySize(){
-  const dpr = window.devicePixelRatio || 1;
-  const width = Math.floor(canvas.clientWidth * dpr);
-  const height = Math.floor(canvas.clientHeight * dpr);
-  if(canvas.width !== width || canvas.height !== height){
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0,0,width,height);
+function resize(){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const w = Math.floor(innerWidth * dpr);
+  const h = Math.floor(innerHeight * dpr);
+  if(canvas.width !== w || canvas.height !== h){
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = innerHeight + 'px';
+    gl.viewport(0,0,w,h);
   }
 }
+window.addEventListener('resize', resize);
+resize();
 
-/* compile shader */
-function compileShader(src, type){
+/* compile shader helpers */
+function compile(src, type){
   const s = gl.createShader(type);
   gl.shaderSource(s, src);
   gl.compileShader(s);
   if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
-    console.error(gl.getShaderInfoLog(s));
-    gl.deleteShader(s);
-    return null;
+    console.error(gl.getShaderInfoLog(s)); throw 'shader error';
   }
   return s;
 }
-
-/* create program */
-function createProgram(vsSrc, fsSrc){
-  const vs = compileShader(vsSrc, gl.VERTEX_SHADER);
-  const fs = compileShader(fsSrc, gl.FRAGMENT_SHADER);
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
-    console.error(gl.getProgramInfoLog(prog));
-    gl.deleteProgram(prog);
-    return null;
-  }
-  return prog;
+function programFrom(vs, fs){
+  const p = gl.createProgram();
+  gl.attachShader(p, compile(vs, gl.VERTEX_SHADER));
+  gl.attachShader(p, compile(fs, gl.FRAGMENT_SHADER));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p, gl.LINK_STATUS)){ console.error(gl.getProgramInfoLog(p)); throw 'link error'; }
+  return p;
 }
 
-/* -------------------------
-   Shaders (simple lambert + color)
-   ------------------------- */
-const vsSource = `#version 300 es
+/* simple vertex/fragment (Lambert-ish) */
+const vs = `#version 300 es
 precision highp float;
-layout(location=0) in vec3 aPosition;
+layout(location=0) in vec3 aPos;
 layout(location=1) in vec3 aNormal;
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProj;
 out vec3 vNormal;
-out vec3 vWorldPos;
+out vec3 vPos;
 void main(){
-  vec4 worldPos = uModel * vec4(aPosition, 1.0);
-  vWorldPos = worldPos.xyz;
+  vPos = (uModel * vec4(aPos,1.0)).xyz;
   vNormal = mat3(uModel) * aNormal;
-  gl_Position = uProj * uView * worldPos;
-}
-`;
-
-const fsSource = `#version 300 es
+  gl_Position = uProj * uView * vec4(vPos,1.0);
+}`;
+const fs = `#version 300 es
 precision highp float;
 in vec3 vNormal;
-in vec3 vWorldPos;
+in vec3 vPos;
 out vec4 outColor;
 uniform vec3 uLightDir;
 uniform vec3 uColor;
 uniform vec3 uAmbient;
-uniform float uShininess;
 void main(){
   vec3 N = normalize(vNormal);
-  vec3 L = normalize(uLightDir);
-  float lambert = max(dot(N, L), 0.0);
-  vec3 diffuse = uColor * lambert;
-  vec3 ambient = uAmbient * uColor;
-  outColor = vec4(diffuse + ambient, 1.0);
-}
-`;
+  float d = max(dot(N, normalize(uLightDir)), 0.0);
+  vec3 col = uAmbient * uColor + d * uColor;
+  // slight rim
+  float rim = pow(1.0 - max(0.0, dot(N, normalize(-vPos))), 2.0) * 0.08;
+  outColor = vec4(col + rim, 1.0);
+}`;
 
-/* -------------------------
-   Geometry: cube
-   ------------------------- */
+/* create program */
+const prog = programFrom(vs, fs);
+gl.useProgram(prog);
+const loc = {
+  uModel: gl.getUniformLocation(prog, 'uModel'),
+  uView: gl.getUniformLocation(prog, 'uView'),
+  uProj: gl.getUniformLocation(prog, 'uProj'),
+  uLightDir: gl.getUniformLocation(prog, 'uLightDir'),
+  uColor: gl.getUniformLocation(prog, 'uColor'),
+  uAmbient: gl.getUniformLocation(prog, 'uAmbient')
+};
+
+/* -------------------- geometry: cube -------------------- */
+/* simple cube positions, normals, indices */
 function createCube(size=1){
   const s = size/2;
-  // positions and normals
-  const positions = new Float32Array([
+  const pos = new Float32Array([
+    // 6 faces, 4 verts each
     // +X
-    s, -s, -s,   s,  s, -s,   s,  s,  s,   s, -s,  s,
+    s,-s,-s,  s,s,-s,  s,s,s,  s,-s,s,
     // -X
-    -s, -s,  s,  -s,  s,  s,  -s,  s, -s,  -s, -s, -s,
+    -s,-s,s, -s,s,s, -s,s,-s, -s,-s,-s,
     // +Y
-    -s, s, -s,   -s, s,  s,    s, s,  s,    s, s, -s,
+    -s,s,-s, -s,s,s, s,s,s, s,s,-s,
     // -Y
-    -s, -s,  s,  -s, -s, -s,   s, -s, -s,   s, -s,  s,
+    -s,-s,s, -s,-s,-s, s,-s,-s, s,-s,s,
     // +Z
-    -s, -s, s,    s, -s, s,    s,  s, s,   -s,  s, s,
+    -s,-s,s, s,-s,s, s,s,s, -s,s,s,
     // -Z
-    s, -s, -s,   -s, -s, -s,   -s,  s, -s,   s,  s, -s
+    s,-s,-s, -s,-s,-s, -s,s,-s, s,s,-s
   ]);
-  const normals = new Float32Array([
+  const norm = new Float32Array([
     // +X
-    1,0,0, 1,0,0, 1,0,0, 1,0,0,
+    1,0,0,1,0,0,1,0,0,1,0,0,
     // -X
     -1,0,0,-1,0,0,-1,0,0,-1,0,0,
     // +Y
@@ -255,7 +181,7 @@ function createCube(size=1){
     // -Z
     0,0,-1,0,0,-1,0,0,-1,0,0,-1
   ]);
-  const indices = new Uint16Array([
+  const idx = new Uint16Array([
     0,1,2, 0,2,3,
     4,5,6, 4,6,7,
     8,9,10, 8,10,11,
@@ -263,44 +189,54 @@ function createCube(size=1){
     16,17,18, 16,18,19,
     20,21,22, 20,22,23
   ]);
-  return {positions, normals, indices};
+  return {pos,norm,idx};
 }
+const cube = createCube(1);
+const vboPos = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+gl.bufferData(gl.ARRAY_BUFFER, cube.pos, gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
 
-/* -------------------------
-   Matrices (minimal)
-   ------------------------- */
-function mat4_identity(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
-function mat4_mul(a,b){
+const vboNorm = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vboNorm);
+gl.bufferData(gl.ARRAY_BUFFER, cube.norm, gl.STATIC_DRAW);
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer(1,3,gl.FLOAT,false,0,0);
+
+const ibo = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cube.idx, gl.STATIC_DRAW);
+
+/* GL state */
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+
+/* -------------------- math helpers -------------------- */
+function identity(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
+function translate(tx,ty,tz){
+  const m = identity(); m[12]=tx; m[13]=ty; m[14]=tz; return m;
+}
+function scale(sx,sy,sz){
+  const m = identity(); m[0]=sx; m[5]=sy; m[10]=sz; return m;
+}
+function mul(a,b){
   const out = new Array(16);
-  for(let i=0;i<4;i++){
-    for(let j=0;j<4;j++){
-      out[i*4+j] = 0;
-      for(let k=0;k<4;k++) out[i*4+j] += a[i*4+k]*b[k*4+j];
-    }
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++){
+    let sum=0;
+    for(let k=0;k<4;k++) sum += a[i*4+k]*b[k*4+j];
+    out[i*4+j]=sum;
   }
   return out;
 }
-function mat4_translate(tx,ty,tz){
-  const m = mat4_identity(); m[12]=tx; m[13]=ty; m[14]=tz; return m;
-}
-function mat4_scale(sx,sy,sz){
-  const m = mat4_identity(); m[0]=sx; m[5]=sy; m[10]=sz; return m;
-}
-function mat4_rotateY(a){
-  const c=Math.cos(a), s=Math.sin(a);
-  return [c,0,s,0, 0,1,0,0, -s,0,c,0, 0,0,0,1];
-}
-function mat4_perspective(fovy, aspect, near, far){
+function perspective(fovy, aspect, near, far){
   const f = 1.0/Math.tan(fovy/2);
   const nf = 1/(near - far);
-  const out = new Array(16);
-  out[0] = f/aspect; out[1]=0; out[2]=0; out[3]=0;
-  out[4]=0; out[5]=f; out[6]=0; out[7]=0;
-  out[8]=0; out[9]=0; out[10]=(far+near)*nf; out[11]=-1;
-  out[12]=0; out[13]=0; out[14]=(2*far*near)*nf; out[15]=0;
+  const out = new Array(16).fill(0);
+  out[0] = f/aspect; out[5]=f; out[10]=(far+near)*nf; out[11]=-1; out[14]=(2*far*near)*nf;
   return out;
 }
-function mat4_lookAt(eye, center, up){
+function lookAt(eye, center, up){
   const [ex,ey,ez]=eye, [cx,cy,cz]=center, [ux,uy,uz]=up;
   let zx = ex-cx, zy = ey-cy, zz = ez-cz;
   let zl = Math.hypot(zx,zy,zz); zx/=zl; zy/=zl; zz/=zl;
@@ -318,892 +254,247 @@ function mat4_lookAt(eye, center, up){
   ];
 }
 
-/* -------------------------
-   GL Program + Buffers
-   ------------------------- */
-const program = createProgram(vsSource, fsSource);
-gl.useProgram(program);
-const attribPos = 0, attribNormal = 1;
-const uModelLoc = gl.getUniformLocation(program, 'uModel');
-const uViewLoc = gl.getUniformLocation(program, 'uView');
-const uProjLoc = gl.getUniformLocation(program, 'uProj');
-const uLightDirLoc = gl.getUniformLocation(program, 'uLightDir');
-const uColorLoc = gl.getUniformLocation(program, 'uColor');
-const uAmbientLoc = gl.getUniformLocation(program, 'uAmbient');
-
-const cube = createCube(1);
-const posBuf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
-gl.bufferData(gl.ARRAY_BUFFER, cube.positions, gl.STATIC_DRAW);
-
-const normBuf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
-gl.bufferData(gl.ARRAY_BUFFER, cube.normals, gl.STATIC_DRAW);
-
-const idxBuf = gl.createBuffer();
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
-gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cube.indices, gl.STATIC_DRAW);
-
-/* enable attributes */
-gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
-gl.enableVertexAttribArray(attribPos);
-gl.vertexAttribPointer(attribPos, 3, gl.FLOAT, false, 0, 0);
-
-gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
-gl.enableVertexAttribArray(attribNormal);
-gl.vertexAttribPointer(attribNormal, 3, gl.FLOAT, false, 0, 0);
-
-/* GL state */
-gl.enable(gl.DEPTH_TEST);
-gl.enable(gl.CULL_FACE);
-
-/* -------------------------
-   Game state
-   ------------------------- */
-let gameRunning = false;
-let score = 0;
-let speedMultiplier = 1.0;
-let lives = 3;
-
-/* player */
-const player = {
-  x: 0, // lane: -1, 0, 1
+/* -------------------- game state -------------------- */
+const lanes = [-2.0, 0.0, 2.0]; // x positions
+let player = {
+  laneIndex: 1, // 0..2
+  x: lanes[1],
   y: 0,
-  z: 0,
-  vx: 0,
-  vy: 0,
+  z: 0.8,
   width: 0.8,
-  height: 0.8,
-  depth: 0.8,
-  lane: 0,
-  onGround: true
+  height: 1.6,
+  depth: 0.6,
+  vy: 0,
+  onGround: true,
+  targetX: lanes[1],
+  smoothX: lanes[1]
 };
-
-/* lanes positions */
-const lanes = [-1.6, 0, 1.6];
-
-/* obstacles */
-const obstacles = []; // each: {x,y,z,w,h,d, type}
-
-/* spawn control */
+let obstacles = []; // {laneIndex, x,y,z,w,h,d}
 let spawnTimer = 0;
-
-/* camera */
-const camera = {
-  eye: [0, 2.2, 6],
-  center: [0, 1.2, 0],
-  up: [0,1,0],
-  fov: Math.PI/3
-};
+let score = 0;
+let speed = 1.0;
+let lives = 3;
+let running = false;
 
 /* UI refs */
 const scoreEl = document.getElementById('score');
 const speedEl = document.getElementById('speed');
 const livesEl = document.getElementById('lives');
+const menu = document.getElementById('menu');
 const startBtn = document.getElementById('startBtn');
-const restartBtn = document.getElementById('restartBtn');
-const message = document.getElementById('message');
-const msgStart = document.getElementById('msgStart');
-const msgTitle = document.getElementById('msgTitle');
-const msgText = document.getElementById('msgText');
-
-/* controls */
 const leftBtn = document.getElementById('leftBtn');
 const rightBtn = document.getElementById('rightBtn');
 const jumpBtn = document.getElementById('jumpBtn');
 
-/* input state */
-const input = { left:false, right:false, jump:false };
-
-/* -------------------------
-   Game logic
-   ------------------------- */
-function resetGame(){
-  score = 0;
-  speedMultiplier = 1.0;
-  lives = 3;
-  player.lane = 0;
-  player.x = lanes[player.lane];
-  player.y = 0;
-  player.vy = 0;
-  player.onGround = true;
-  obstacles.length = 0;
-  spawnTimer = 0;
-  updateUI();
-}
-
-function startGame(){
-  resetGame();
-  gameRunning = true;
-  message.style.display = 'none';
-  startBtn.style.display = 'none';
-  restartBtn.style.display = 'inline-block';
-  lastTime = performance.now();
-  requestAnimationFrame(loop);
-}
-
-function endGame(){
-  gameRunning = false;
-  msgTitle.textContent = 'Game Over';
-  msgText.textContent = `Score: ${score}`;
-  message.style.display = 'block';
-  startBtn.style.display = 'inline-block';
-  restartBtn.style.display = 'none';
-}
-
-/* spawn obstacle */
-function spawnObstacle(){
-  // random lane, random size
-  const lane = Math.floor(Math.random()*3);
-  const w = rand(0.6, 1.2);
-  const h = rand(0.6, 1.6);
-  const d = rand(0.6, 1.2);
-  const z = -30; // far ahead
-  obstacles.push({ x: lanes[lane], y: h/2, z: z, w, h, d, lane });
-}
-
-/* collision check AABB */
-function aabbCollision(ax,ay,az,aw,ah,ad, bx,by,bz,bw,bh,bd){
-  return Math.abs(ax-bx) * 2 < (aw + bw) &&
-         Math.abs(ay-by) * 2 < (ah + bh) &&
-         Math.abs(az-bz) * 2 < (ad + bd);
-}
-
-/* update UI */
-function updateUI(){
-  scoreEl.textContent = Math.floor(score);
-  speedEl.textContent = speedMultiplier.toFixed(2) + 'x';
-  livesEl.textContent = lives;
-}
-
-/* -------------------------
-   Input handlers
-   ------------------------- */
+/* input */
+const input = {left:false,right:false,jump:false};
 window.addEventListener('keydown', (e)=>{
-  if(!gameRunning) return;
-  if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') input.left = true;
-  if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = true;
-  if(e.key === ' ' || e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') input.jump = true;
+  if(e.key==='ArrowLeft' || e.key==='a') input.left = true;
+  if(e.key==='ArrowRight' || e.key==='d') input.right = true;
+  if(e.key==='ArrowUp' || e.key==='w' || e.key===' ') input.jump = true;
 });
 window.addEventListener('keyup', (e)=>{
-  if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') input.left = false;
-  if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = false;
-  if(e.key === ' ' || e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') input.jump = false;
+  if(e.key==='ArrowLeft' || e.key==='a') input.left = false;
+  if(e.key==='ArrowRight' || e.key==='d') input.right = false;
+  if(e.key==='ArrowUp' || e.key==='w' || e.key===' ') input.jump = false;
 });
-
 leftBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.left = true; });
 leftBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); input.left = false; });
 rightBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.right = true; });
 rightBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); input.right = false; });
-jumpBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.jump = true; setTimeout(()=>input.jump=false, 120); });
+jumpBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.jump = true; setTimeout(()=>input.jump=false,120); });
 
-leftBtn.addEventListener('mousedown', ()=>input.left = true);
-leftBtn.addEventListener('mouseup', ()=>input.left = false);
-rightBtn.addEventListener('mousedown', ()=>input.right = true);
-rightBtn.addEventListener('mouseup', ()=>input.right = false);
-jumpBtn.addEventListener('mousedown', ()=>{ input.jump = true; setTimeout(()=>input.jump=false, 120); });
+leftBtn.addEventListener('mousedown', ()=>input.left=true);
+leftBtn.addEventListener('mouseup', ()=>input.left=false);
+rightBtn.addEventListener('mousedown', ()=>input.right=true);
+rightBtn.addEventListener('mouseup', ()=>input.right=false);
+jumpBtn.addEventListener('mousedown', ()=>{ input.jump=true; setTimeout(()=>input.jump=false,120); });
 
-startBtn.addEventListener('click', ()=>startGame());
-msgStart.addEventListener('click', ()=>startGame());
-restartBtn.addEventListener('click', ()=>startGame());
+/* swipe for lane switching */
+let touchStart = null;
+canvas.addEventListener('touchstart', (e)=>{ if(e.touches[0]) touchStart = {x:e.touches[0].clientX, y:e.touches[0].clientY}; }, {passive:true});
+canvas.addEventListener('touchend', (e)=>{
+  if(!touchStart) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStart.x;
+  const dy = t.clientY - touchStart.y;
+  if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30){
+    if(dx < 0) tryMoveLeft(); else tryMoveRight();
+  } else if(Math.abs(dy) > 30 && dy < 0){
+    // swipe up = jump
+    input.jump = true; setTimeout(()=>input.jump=false,120);
+  }
+  touchStart = null;
+}, {passive:true});
 
-/* -------------------------
-   Rendering helpers
-   ------------------------- */
-function drawCube(modelMat, color){
-  gl.uniformMatrix4fv(uModelLoc, false, new Float32Array(modelMat));
-  gl.uniform3fv(uColorLoc, color);
-  gl.uniform3fv(uAmbientLoc, [0.12,0.12,0.12]);
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
-  gl.drawElements(gl.TRIANGLES, cube.indices.length, gl.UNSIGNED_SHORT, 0);
+/* start/restart */
+startBtn.addEventListener('click', ()=>{ menu.style.display='none'; start(); });
+
+function tryMoveLeft(){ player.laneIndex = Math.max(0, player.laneIndex - 1); player.targetX = lanes[player.laneIndex]; }
+function tryMoveRight(){ player.laneIndex = Math.min(2, player.laneIndex + 1); player.targetX = lanes[player.laneIndex]; }
+
+/* also map keyboard left/right to lane switching on keydown (single step) */
+window.addEventListener('keydown', (e)=>{
+  if(!running) return;
+  if(e.key==='ArrowLeft' || e.key==='a') tryMoveLeft();
+  if(e.key==='ArrowRight' || e.key==='d') tryMoveRight();
+  if(e.key==='ArrowUp' || e.key==='w' || e.key===' ') { if(player.onGround){ player.vy = 7.5; player.onGround=false; } }
+});
+
+/* spawn obstacles */
+function spawn(){
+  const lane = Math.floor(Math.random()*3);
+  const w = rand(0.6, 1.2), h = rand(0.8, 1.8), d = rand(0.6, 1.2);
+  const z = -30 - Math.random()*20;
+  obstacles.push({laneIndex:lane, x:lanes[lane], y:h/2, z:z, w,h,d});
 }
 
-/* -------------------------
-   Main loop
-   ------------------------- */
-let lastTime = performance.now();
-function loop(t){
-  if(!gameRunning) return;
-  resizeCanvasToDisplaySize();
+/* collision AABB */
+function collide(a,b){
+  return Math.abs(a.x - b.x) * 2 < (a.width + b.w) &&
+         Math.abs((a.y + a.height/2) - b.y) * 2 < (a.height + b.h) &&
+         Math.abs(a.z - b.z) * 2 < (a.depth + b.d);
+}
 
-  const dt = Math.min(0.05, (t - lastTime) / 1000);
-  lastTime = t;
+/* helper random */
+function rand(a,b){ return Math.random()*(b-a)+a; }
 
-  // update speed gradually
-  speedMultiplier += dt * 0.02; // slowly increase difficulty
-  // spawn obstacles
-  spawnTimer += dt * speedMultiplier;
-  if(spawnTimer > 0.9){
-    spawnTimer = 0;
-    spawnObstacle();
-  }
+/* update UI */
+function updateUI(){ scoreEl.textContent = 'Score: ' + Math.floor(score); speedEl.textContent = 'Speed: ' + speed.toFixed(2) + 'x'; livesEl.textContent = 'Lives: ' + lives; }
 
-  // player lateral movement (lane switching)
-  if(input.left){
-    player.lane = clamp(player.lane - 1, -1, 1); // but we use lane index 0..2, so handle below
-  }
-  if(input.right){
-    player.lane = clamp(player.lane + 1, -1, 1);
-  }
-  // convert lane index to lanes array index
-  // We'll keep player.lane as -1,0,1 and map to lanes array
-  const laneIndex = Math.round(player.lane) + 1; // -1->0,0->1,1->2
-  player.x = lanes[laneIndex];
+/* draw cube with model matrix and color */
+function drawCube(model, color){
+  gl.uniformMatrix4fv(loc.uModel, false, new Float32Array(model));
+  gl.uniform3fv(loc.uColor, color);
+  gl.uniform3fv(loc.uAmbient, [0.12,0.12,0.12]);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+  gl.drawElements(gl.TRIANGLES, cube.idx.length, gl.UNSIGNED_SHORT, 0);
+}
 
-  // jump
-  if(input.jump && player.onGround){
-    player.vy = 6.5;
-    player.onGround = false;
-  }
-  // gravity
+/* camera */
+const camEye = [0, 3.0, 8.0];
+const camCenter = [0, 1.2, 0];
+const camUp = [0,1,0];
+
+/* main loop */
+let last = performance.now();
+function start(){
+  running = true;
+  score = 0; speed = 1.0; lives = 3; obstacles = []; spawnTimer = 0;
+  player.laneIndex = 1; player.targetX = lanes[1]; player.x = lanes[1]; player.y = 0; player.vy = 0; player.onGround = true;
+  updateUI();
+  last = performance.now();
+  requestAnimationFrame(tick);
+}
+
+function tick(t){
+  if(!running) return;
+  resize();
+  const dt = Math.min(0.05, (t - last)/1000);
+  last = t;
+
+  // speed increases slowly
+  speed += dt * 0.02;
+  spawnTimer += dt * speed;
+  if(spawnTimer > 0.9){ spawnTimer = 0; spawn(); }
+
+  // smooth lane interpolation
+  player.smoothX += (player.targetX - player.smoothX) * Math.min(1, 12 * dt);
+  player.x = player.smoothX;
+
+  // jump physics
+  if(input.jump && player.onGround){ player.vy = 7.5; player.onGround = false; }
   player.vy -= 18 * dt;
   player.y += player.vy * dt;
-  if(player.y <= 0){
-    player.y = 0;
-    player.vy = 0;
-    player.onGround = true;
-  }
+  if(player.y <= 0){ player.y = 0; player.vy = 0; player.onGround = true; }
 
-  // move obstacles toward player (increase z)
-  for(let i=obstacles.length-1;i>=0;i--){
+  // move obstacles forward
+  for(let i = obstacles.length - 1; i >= 0; i--){
     const o = obstacles[i];
-    o.z += 12 * dt * speedMultiplier;
-    // collision check
-    if(aabbCollision(player.x, player.y + player.height/2, 0, player.width, player.height, player.depth,
-                    o.x, o.y, o.z, o.w, o.h, o.d)){
-      // hit
+    o.z += 12 * dt * speed;
+    // collision check with player
+    const a = {x: player.x, y: player.y, z: player.z, width: player.width, height: player.height, depth: player.depth};
+    if(collide(a, o)){
       obstacles.splice(i,1);
       lives -= 1;
-      updateUI();
-      if(lives <= 0){
-        endGame();
-        return;
-      }
+      if(lives <= 0){ running = false; menu.style.display='block'; document.getElementById('menu').querySelector('div').textContent = 'Game Over'; document.getElementById('menu').querySelector('div').style.color = '#f97316'; }
     } else if(o.z > 6){
-      // passed by player
+      // passed
       obstacles.splice(i,1);
-      score += Math.floor(10 * speedMultiplier);
-      updateUI();
+      score += Math.floor(10 * speed);
     }
   }
 
-  // update UI
   updateUI();
 
-  // render scene
+  // render
   gl.clearColor(0.02,0.03,0.06,1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  // camera matrices
+  // set view/proj
   const aspect = canvas.width / canvas.height;
-  const proj = mat4_perspective(camera.fov, aspect, 0.1, 100.0);
-  const view = mat4_lookAt(camera.eye, camera.center, camera.up);
-  gl.uniformMatrix4fv(uViewLoc, false, new Float32Array(view));
-  gl.uniformMatrix4fv(uProjLoc, false, new Float32Array(proj));
-  gl.uniform3fv(uLightDirLoc, [0.5, 0.8, 0.6]);
+  const proj = perspective(Math.PI/3, aspect, 0.1, 100.0);
+  const view = lookAt(camEye, camCenter, camUp);
+  gl.uniformMatrix4fv(loc.uView, false, new Float32Array(view));
+  gl.uniformMatrix4fv(loc.uProj, false, new Float32Array(proj));
+  gl.uniform3fv(loc.uLightDir, [0.5, 0.8, 0.6]);
 
-  // ground plane (draw many cubes scaled flat)
-  for(let i=-6;i<8;i++){
+  // ground tiles
+  for(let i=-8;i<12;i++){
     for(let j=-2;j<=2;j++){
-      const tx = j * 1.6;
-      const tz = i * 2 - (t*0.5 % 2);
-      const model = mat4_mul(mat4_translate(tx, -0.5, tz), mat4_scale(0.8, 0.1, 1.0));
+      const tx = j * 2.0;
+      const tz = i * 2.5 + (t*0.2 % 2.5);
+      const model = mul(translate(tx, -0.6, tz), scale(1.8, 0.2, 2.2));
       drawCube(model, [0.06,0.08,0.12]);
     }
   }
 
-  // draw player cube
-  const playerModel = mat4_mul(mat4_translate(player.x, player.y + player.height/2, 0.8), mat4_scale(player.width, player.height, player.depth));
-  drawCube(playerModel, [0.2,0.6,0.95]);
+  // draw player (low-poly man built from cubes)
+  // body
+  const bodyModel = mul(translate(player.x, player.y + 0.6, player.z), mul(scale(0.6, 0.9, 0.4), identity()));
+  drawCube(bodyModel, [0.18,0.6,0.95]);
+  // head
+  const headModel = mul(translate(player.x, player.y + 1.45, player.z), scale(0.45,0.45,0.45));
+  drawCube(headModel, [0.95,0.85,0.7]);
+  // left arm
+  const la = mul(translate(player.x - 0.6, player.y + 0.6, player.z), mul(scale(0.2,0.7,0.2), identity()));
+  drawCube(la, [0.18,0.6,0.95]);
+  // right arm
+  const ra = mul(translate(player.x + 0.6, player.y + 0.6, player.z), mul(scale(0.2,0.7,0.2), identity()));
+  drawCube(ra, [0.18,0.6,0.95]);
+  // legs
+  const ll = mul(translate(player.x - 0.22, player.y - 0.6, player.z), mul(scale(0.25,0.8,0.25), identity()));
+  drawCube(ll, [0.12,0.12,0.14]);
+  const rl = mul(translate(player.x + 0.22, player.y - 0.6, player.z), mul(scale(0.25,0.8,0.25), identity()));
+  drawCube(rl, [0.12,0.12,0.14]);
 
-  // draw obstacles
+  // obstacles
   for(const o of obstacles){
-    const model = mat4_mul(mat4_translate(o.x, o.y, o.z), mat4_scale(o.w, o.h, o.d));
+    const model = mul(translate(o.x, o.y, o.z), scale(o.w, o.h, o.d));
     drawCube(model, [0.95,0.35,0.25]);
   }
 
-  // small rotating collectible (optional)
-  // increase score slowly
-  score += dt * 1.2 * speedMultiplier;
+  // small floating score increment
+  score += dt * 0.5 * speed;
 
-  // loop
-  requestAnimationFrame(loop);
+  requestAnimationFrame(tick);
 }
 
-/* -------------------------
-   Initialization
-   ------------------------- */
+/* init */
 function init(){
-  // initial UI
+  gl.useProgram(prog);
+  // set static uniforms
+  gl.uniform3fv(loc.uAmbient, [0.12,0.12,0.12]);
   updateUI();
-  // show message
-  message.style.display = 'block';
-  msgTitle.textContent = '3D Runner';
-  msgText.textContent = 'Tap Start. Steuerung: Links/Rechts, Jump. Touch & Keyboard supported.';
-  // set canvas size to full window
-  canvas.style.width = window.innerWidth + 'px';
-  canvas.style.height = window.innerHeight + 'px';
-  resizeCanvasToDisplaySize();
-  // pre-spawn a few obstacles to make it interesting
-  for(let i=0;i<3;i++) spawnObstacle();
 }
 init();
 
-</script>
-</body>
-</html>
-  .chip.active{color:var(--accent);border-color:rgba(56,189,248,0.18);background:linear-gradient(180deg, rgba(56,189,248,0.02), transparent)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-  .card{
-    height:var(--btn-h);display:flex;flex-direction:row;align-items:center;gap:12px;padding:12px;border-radius:12px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-    border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform .14s,box-shadow .14s,border-color .14s;
-  }
-  .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.6);border-color:rgba(56,189,248,0.12)}
-  .icon{width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;font-size:26px}
-  .meta{display:flex;flex-direction:column;gap:2px}
-  .name{font-weight:600;font-size:15px}
-  .tag{font-size:12px;color:var(--muted)}
-  /* right: info / tycoon panel */
-  .panel{background:var(--panel);border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,0.03);height:100%;display:flex;flex-direction:column;gap:12px}
-  .panel h3{margin:0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em}
-  .tycoon-overview{display:flex;flex-direction:column;gap:8px}
-  .stat-row{display:flex;gap:8px}
-  .stat{flex:1;background:var(--card);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);text-align:center}
-  .stat .v{font-weight:700;font-size:18px}
-  .achievements{display:flex;flex-wrap:wrap;gap:6px}
-  .ach{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:12px;color:var(--muted)}
-  /* overlay fullscreen */
-  .overlay{position:fixed;inset:0;background:rgba(2,6,23,0.98);display:none;flex-direction:column;z-index:80}
-  .overlay.active{display:flex}
-  .overlay .bar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.03)}
-  .overlay .bar .title{font-weight:700}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;color:var(--muted);cursor:pointer}
-  .btn.primary{background:linear-gradient(90deg,var(--accent),#0ea5e9);color:#021124;border:none;box-shadow:0 10px 30px rgba(56,189,248,0.12)}
-  .canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:18px}
-  canvas{background:#000;border-radius:12px;max-width:100%;max-height:100%;display:block}
-  /* small helper */
-  .muted{color:var(--muted);font-size:13px}
-  footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
-</style>
-</head>
-<body>
-  <header><div class="title">🎮 Portal</div></header>
+/* utility identity for composition */
+function identity(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
 
-  <main>
-    <section class="portal" id="portal">
-      <div class="filters" id="filters">
-        <div class="chip active" data-filter="all">Alle</div>
-        <div class="chip" data-filter="retro">Retro</div>
-        <div class="chip" data-filter="arcade">Arcade</div>
-        <div class="chip" data-filter="skill">Skill</div>
-        <div class="chip" data-filter="idle">Idle</div>
-      </div>
+/* start on load if desired */
+// menu visible; user clicks Start
 
-      <div class="grid" id="grid"></div>
-    </section>
-
-    <aside class="panel">
-      <h3>Tycoon (Live)</h3>
-      <div class="tycoon-overview" id="tycoonPanel">
-        <div class="stat-row">
-          <div class="stat"><div class="muted">Money</div><div class="v" id="tyMoney">0</div></div>
-          <div class="stat"><div class="muted">Passive</div><div class="v" id="tyPassive">0/s</div></div>
-        </div>
-        <div class="stat-row">
-          <div class="stat"><div class="muted">Multiplier</div><div class="v" id="tyMult">x1.0</div></div>
-          <div class="stat"><div class="muted">Prestige</div><div class="v" id="tyPrestige">0</div></div>
-        </div>
-        <div>
-          <div class="muted">Achievements</div>
-          <div class="achievements" id="tyAch"></div>
-        </div>
-      </div>
-
-      <h3>Quick</h3>
-      <div style="display:flex;gap:8px">
-        <button class="btn" id="btnMenu">Menü</button>
-        <button class="btn primary" id="btnOpenTycoon">Tycoon</button>
-      </div>
-
-      <div style="flex:1"></div>
-      <div class="muted" style="text-align:center">Touch & Keyboard ready</div>
-    </aside>
-  </main>
-
-  <div class="overlay" id="overlay">
-    <div class="bar">
-      <div style="display:flex;gap:12px;align-items:center">
-        <button class="btn" id="backBtn">⬅</button>
-        <div class="title" id="overlayTitle">Game</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="muted" id="overlayMode">Touch</div>
-        <button class="btn" id="restartBtn">⟳</button>
-      </div>
-    </div>
-    <div class="canvas-wrap">
-      <canvas id="gameCanvas" width="960" height="540"></canvas>
-    </div>
-  </div>
-
-  <footer>Minimal UI • Tap a card to play</footer>
-
-<script>
-/* =========================
-   Data: 10 games (minimal UI)
-   Each game: id, name, icon, category, factory function
-   ========================= */
-const GAME_DEFS = [
-  {id:'snake', name:'Snake', icon:'🐍', cat:'retro'},
-  {id:'flappy', name:'Flappy', icon:'🐤', cat:'retro'},
-  {id:'pong', name:'Pong', icon:'🏓', cat:'arcade'},
-  {id:'breakout', name:'Breakout', icon:'🧱', cat:'arcade'},
-  {id:'cardodge', name:'Car', icon:'🚗', cat:'arcade'},
-  {id:'space', name:'Space', icon:'🚀', cat:'arcade'},
-  {id:'aim', name:'Aim', icon:'🎯', cat:'skill'},
-  {id:'reaction', name:'React', icon:'⚡', cat:'skill'},
-  {id:'memory', name:'Memory', icon:'🧠', cat:'skill'},
-  {id:'clicker', name:'Clicker', icon:'💰', cat:'idle'}
-];
-
-/* ====== UI refs ====== */
-const grid = document.getElementById('grid');
-const filters = document.getElementById('filters');
-const overlay = document.getElementById('overlay');
-const overlayTitle = document.getElementById('overlayTitle');
-const overlayMode = document.getElementById('overlayMode');
-const backBtn = document.getElementById('backBtn');
-const restartBtn = document.getElementById('restartBtn');
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-const tyMoney = document.getElementById('tyMoney');
-const tyPassive = document.getElementById('tyPassive');
-const tyMult = document.getElementById('tyMult');
-const tyPrestige = document.getElementById('tyPrestige');
-const tyAch = document.getElementById('tyAch');
-
-let currentFilter = 'all';
-let currentGameId = null;
-let currentGameInstance = null;
-let raf = null;
-
-/* ====== Render portal cards ====== */
-function renderCards(){
-  grid.innerHTML = '';
-  const list = GAME_DEFS.filter(g => currentFilter === 'all' || g.cat === currentFilter);
-  list.forEach(g=>{
-    const c = document.createElement('div');
-    c.className = 'card';
-    c.dataset.id = g.id;
-    c.innerHTML = `<div class="icon">${g.icon}</div><div class="meta"><div class="name">${g.name}</div><div class="tag">${g.cat.toUpperCase()}</div></div>`;
-    c.addEventListener('click', ()=>openGame(g.id));
-    grid.appendChild(c);
-  });
-}
-
-/* ====== Filter handling ====== */
-filters.addEventListener('click', (e)=>{
-  const chip = e.target.closest('.chip');
-  if(!chip) return;
-  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-  chip.classList.add('active');
-  currentFilter = chip.dataset.filter || 'all';
-  renderCards();
-});
-
-/* ====== Overlay controls ====== */
-backBtn.addEventListener('click', closeGame);
-restartBtn.addEventListener('click', ()=>{ if(currentGameInstance && currentGameInstance.restart) currentGameInstance.restart(); });
-
-/* ====== Resize canvas to fit container while keeping aspect ratio ====== */
-function fitCanvas(){
-  const wrap = canvas.parentElement.getBoundingClientRect();
-  const maxW = wrap.width - 24;
-  const maxH = wrap.height - 24;
-  const aspect = 16/9;
-  let w = maxW, h = w / aspect;
-  if(h > maxH){ h = maxH; w = h * aspect; }
-  canvas.style.width = Math.floor(w) + 'px';
-  canvas.style.height = Math.floor(h) + 'px';
-  // set internal resolution for crispness
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  canvas.width = Math.floor(w * dpr);
-  canvas.height = Math.floor(h * dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-window.addEventListener('resize', fitCanvas);
-
-/* ====== Open / Close game ====== */
-function openGame(id){
-  currentGameId = id;
-  overlay.classList.add('active');
-  overlayTitle.textContent = GAME_DEFS.find(g=>g.id===id).name;
-  overlayMode.textContent = 'Touch';
-  fitCanvas();
-  // create instance
-  if(currentGameInstance && currentGameInstance.destroy) currentGameInstance.destroy();
-  currentGameInstance = createGameInstance(id, canvas, ctx, onTycoonUpdate);
-  if(currentGameInstance && currentGameInstance.start) currentGameInstance.start();
-  // start loop
-  if(raf) cancelAnimationFrame(raf);
-  let last = performance.now();
-  function loop(t){
-    const dt = (t - last) / 1000;
-    last = t;
-    if(currentGameInstance && currentGameInstance.update) currentGameInstance.update(dt);
-    if(currentGameInstance && currentGameInstance.render) currentGameInstance.render();
-    raf = requestAnimationFrame(loop);
-  }
-  raf = requestAnimationFrame(loop);
-}
-
-function closeGame(){
-  overlay.classList.remove('active');
-  if(raf) cancelAnimationFrame(raf);
-  raf = null;
-  if(currentGameInstance && currentGameInstance.destroy) currentGameInstance.destroy();
-  currentGameInstance = null;
-  currentGameId = null;
-}
-
-/* ====== Tycoon UI bridge (live updates from tycoon game) ====== */
-function onTycoonUpdate(state){
-  if(!state) return;
-  tyMoney.textContent = Math.floor(state.money).toLocaleString('de-DE');
-  tyPassive.textContent = (state.passive || 0).toFixed(1) + '/s';
-  tyMult.textContent = 'x' + (state.multiplier || 1).toFixed(2);
-  tyPrestige.textContent = (state.prestige || 0);
-  // achievements
-  tyAch.innerHTML = '';
-  (state.achievements || []).forEach(a=>{
-    const s = document.createElement('div'); s.className='ach'; s.textContent = a; tyAch.appendChild(s);
-  });
-}
-
-/* ====== Game factory: returns object with start/update/render/destroy/restart ====== */
-function createGameInstance(id, canvas, ctx, tycoonCallback){
-  // small helper: clear
-  function clear(){ ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height); }
-
-  if(id === 'snake'){
-    // Snake: grid-based, touch swipe & arrows
-    const grid = 24;
-    const cols = Math.floor(canvas.width / grid);
-    const rows = Math.floor(canvas.height / grid);
-    let snake = [{x:5,y:5}];
-    let dir = {x:1,y:0};
-    let food = {x:10,y:10};
-    let speed = 8; // steps per second
-    let acc = 0;
-    let dead = false;
-
-    function spawnFood(){
-      food = {x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows)};
-    }
-
-    function onKey(e){
-      if(e.key === 'ArrowUp' && dir.y !== 1) dir = {x:0,y:-1};
-      if(e.key === 'ArrowDown' && dir.y !== -1) dir = {x:0,y:1};
-      if(e.key === 'ArrowLeft' && dir.x !== 1) dir = {x:-1,y:0};
-      if(e.key === 'ArrowRight' && dir.x !== -1) dir = {x:1,y:0};
-      if(e.key === 'r') restart();
-    }
-
-    let touchStart = null;
-    function onTouchStart(e){
-      const t = e.touches[0];
-      touchStart = {x:t.clientX, y:t.clientY};
-    }
-    function onTouchMove(e){
-      if(!touchStart) return;
-      const t = e.touches[0];
-      const dx = t.clientX - touchStart.x;
-      const dy = t.clientY - touchStart.y;
-      if(Math.abs(dx) > 20 || Math.abs(dy) > 20){
-        if(Math.abs(dx) > Math.abs(dy)){
-          dir = dx > 0 ? {x:1,y:0} : {x:-1,y:0};
-        } else {
-          dir = dy > 0 ? {x:0,y:1} : {x:0,y:-1};
-        }
-        touchStart = null;
-      }
-    }
-    function onTouchEnd(){ touchStart = null; }
-
-    function start(){ window.addEventListener('keydown', onKey); canvas.addEventListener('touchstart', onTouchStart,{passive:true}); canvas.addEventListener('touchmove', onTouchMove,{passive:true}); canvas.addEventListener('touchend', onTouchEnd,{passive:true}); }
-    function update(dt){
-      if(dead) return;
-      acc += dt;
-      const step = 1 / speed;
-      while(acc >= step){
-        acc -= step;
-        const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
-        // wrap-around
-        if(head.x < 0) head.x = cols - 1;
-        if(head.y < 0) head.y = rows - 1;
-        if(head.x >= cols) head.x = 0;
-        if(head.y >= rows) head.y = 0;
-        // collision
-        if(snake.some(s => s.x === head.x && s.y === head.y)){ dead = true; break; }
-        snake.unshift(head);
-        if(head.x === food.x && head.y === food.y){ spawnFood(); } else snake.pop();
-      }
-    }
-    function render(){
-      clear();
-      // draw grid-ish background
-      ctx.fillStyle = '#071026';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      // snake
-      ctx.fillStyle = '#22c55e';
-      snake.forEach(s => ctx.fillRect(s.x*grid, s.y*grid, grid-1, grid-1));
-      // food
-      ctx.fillStyle = '#f43f5e';
-      ctx.fillRect(food.x*grid, food.y*grid, grid-1, grid-1);
-      if(dead){
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0, canvas.height/2 - 40, canvas.width, 80);
-        ctx.fillStyle = '#f97316';
-        ctx.font = '20px system-ui';
-        ctx.fillText('Game Over — R zum Neustart', 20, canvas.height/2 + 8);
-      }
-    }
-    function restart(){ snake = [{x:5,y:5}]; dir = {x:1,y:0}; spawnFood(); dead = false; acc = 0; }
-    function destroy(){ window.removeEventListener('keydown', onKey); canvas.removeEventListener('touchstart', onTouchStart); canvas.removeEventListener('touchmove', onTouchMove); canvas.removeEventListener('touchend', onTouchEnd); }
-
-    return {start, update, render, destroy, restart};
-  }
-
-  if(id === 'flappy'){
-    // Flappy: simple physics, pipes
-    let y = canvas.height/2, v = 0;
-    const gravity = 900;
-    const flap = -320;
-    const birdX = Math.max(60, canvas.width * 0.12);
-    const pipes = [];
-    let timer = 0;
-    let score = 0;
-    let dead = false;
-
-    function tap(){ if(dead){ reset(); } else v = flap; }
-    function onKey(e){ if(e.key === ' '){ e.preventDefault(); tap(); } if(e.key === 'r') reset(); }
-    function reset(){ y = canvas.height/2; v = 0; pipes.length = 0; timer = 0; score = 0; dead = false; }
-
-    function start(){ canvas.addEventListener('touchstart', tap, {passive:true}); window.addEventListener('keydown', onKey); }
-    function update(dt){
-      if(dead) return;
-      v += gravity * dt;
-      y += v * dt;
-      timer += dt;
-      if(timer > 1.2){ timer = 0; const gap = 140; const mid = 80 + Math.random()*(canvas.height - 200); pipes.push({x: canvas.width + 40, mid, gap}); }
-      for(const p of pipes) p.x -= 160 * dt;
-      // collision
-      if(y < 0 || y > canvas.height) dead = true;
-      for(const p of pipes){
-        if(birdX > p.x - 20 && birdX < p.x + 40){
-          if(y < p.mid - p.gap/2 || y > p.mid + p.gap/2) dead = true;
-        }
-        if(!p.scored && p.x + 40 < birdX){ p.scored = true; score++; }
-      }
-      while(pipes.length && pipes[0].x < -80) pipes.shift();
-    }
-    function render(){
-      clear();
-      // sky
-      ctx.fillStyle = '#071026'; ctx.fillRect(0,0,canvas.width,canvas.height);
-      // pipes
-      ctx.fillStyle = '#16a34a';
-      pipes.forEach(p => {
-        ctx.fillRect(p.x, 0, 40, p.mid - p.gap/2);
-        ctx.fillRect(p.x, p.mid + p.gap/2, 40, canvas.height - (p.mid + p.gap/2));
-      });
-      // bird
-      ctx.fillStyle = '#facc15';
-      ctx.fillRect(birdX, y, 22, 18);
-      // score
-      ctx.fillStyle = '#e6eef8'; ctx.font = '18px system-ui'; ctx.fillText('' + score, 12, 28);
-      if(dead){
-        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, canvas.height/2 - 40, canvas.width, 80);
-        ctx.fillStyle = '#f97316'; ctx.font = '18px system-ui'; ctx.fillText('Game Over — Tap / Space to restart', 20, canvas.height/2 + 8);
-      }
-    }
-    function destroy(){ canvas.removeEventListener('touchstart', tap); window.removeEventListener('keydown', onKey); }
-    return {start, update, render, destroy, restart: reset};
-  }
-
-  if(id === 'pong'){
-    // Pong: simple single-player paddle
-    let paddleY = canvas.height/2 - 40;
-    let ball = {x: canvas.width/2, y: canvas.height/2, vx: 220, vy: 140, r: 8};
-    function onMove(e){ const rect = canvas.getBoundingClientRect(); paddleY = e.clientY - rect.top - 40; }
-    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); paddleY = t.clientY - rect.top - 40; }
-    function start(){ canvas.addEventListener('mousemove', onMove); canvas.addEventListener('touchmove', onTouch, {passive:true}); }
-    function update(dt){
-      ball.x += ball.vx * dt; ball.y += ball.vy * dt;
-      if(ball.y < ball.r || ball.y > canvas.height - ball.r) ball.vy *= -1;
-      if(ball.x - ball.r < 20 && ball.y > paddleY && ball.y < paddleY + 80 && ball.vx < 0) ball.vx *= -1;
-      if(ball.x > canvas.width - ball.r) ball.vx *= -1;
-      if(ball.x < -40){ ball.x = canvas.width/2; ball.y = canvas.height/2; ball.vx = 220; ball.vy = 140; }
-    }
-    function render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.fillRect(10, paddleY, 10, 80); ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fillStyle='#f97316'; ctx.fill(); }
-    function destroy(){ canvas.removeEventListener('mousemove', onMove); canvas.removeEventListener('touchmove', onTouch); }
-    return {start, update, render, destroy, restart(){ ball.x = canvas.width/2; ball.y = canvas.height/2; }};
-  }
-
-  if(id === 'breakout'){
-    // Breakout: simple bricks
-    const paddle = {w:120, x: canvas.width/2 - 60, y: canvas.height - 40};
-    let ball = {x: canvas.width/2, y: canvas.height/2, vx: 200, vy: -200, r: 8};
-    const bricks = [];
-    const rows = 5, cols = 8;
-    const bw = Math.floor(canvas.width / cols), bh = 20;
-    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) bricks.push({x:c*bw+4, y:60+r*(bh+6), w:bw-8, h:bh, alive:true});
-    function onMove(e){ const rect = canvas.getBoundingClientRect(); paddle.x = e.clientX - rect.left - paddle.w/2; }
-    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); paddle.x = t.clientX - rect.left - paddle.w/2; }
-    function start(){ canvas.addEventListener('mousemove', onMove); canvas.addEventListener('touchmove', onTouch, {passive:true}); }
-    function update(dt){
-      ball.x += ball.vx * dt; ball.y += ball.vy * dt;
-      if(ball.x < ball.r || ball.x > canvas.width - ball.r) ball.vx *= -1;
-      if(ball.y < ball.r) ball.vy *= -1;
-      if(ball.y > canvas.height + 40){ ball.x = canvas.width/2; ball.y = canvas.height/2; }
-      // paddle collision
-      if(ball.y + ball.r >= paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + paddle.w && ball.vy > 0) { ball.vy *= -1; const hit = (ball.x - (paddle.x + paddle.w/2)) / (paddle.w/2); ball.vx = 300 * hit; }
-      // bricks
-      for(const b of bricks){
-        if(!b.alive) continue;
-        if(ball.x > b.x && ball.x < b.x + b.w && ball.y - ball.r < b.y + b.h && ball.y + ball.r > b.y){ b.alive = false; ball.vy *= -1; break; }
-      }
-    }
-    function render(){ clear(); ctx.fillStyle='#38bdf8'; ctx.fillRect(paddle.x, paddle.y, paddle.w, 12); ctx.fillStyle='#f97316'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#e6eef8'; bricks.forEach(b=>{ if(b.alive) ctx.fillRect(b.x,b.y,b.w,b.h); }); }
-    function destroy(){ canvas.removeEventListener('mousemove', onMove); canvas.removeEventListener('touchmove', onTouch); }
-    return {start, update, render, destroy, restart(){ ball.x = canvas.width/2; ball.y = canvas.height/2; }};
-  }
-
-  if(id === 'cardodge'){
-    // Car Dodge: simple obstacles
-    let carX = canvas.width/2;
-    const obstacles = [];
-    function onKey(e){ if(e.key === 'ArrowLeft') carX -= 40; if(e.key === 'ArrowRight') carX += 40; }
-    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); carX = t.clientX - rect.left; }
-    function start(){ window.addEventListener('keydown', onKey); canvas.addEventListener('touchmove', onTouch, {passive:true}); }
-    function update(dt){
-      if(Math.random() < 0.06) obstacles.push({x: Math.random()*canvas.width, y: -40, speed: 120 + Math.random()*120});
-      obstacles.forEach(o => o.y += o.speed * dt);
-      while(obstacles.length && obstacles[0].y > canvas.height + 40) obstacles.shift();
-    }
-    function render(){ clear(); ctx.fillStyle='#22c55e'; ctx.fillRect(carX-18, canvas.height-70, 36, 50); ctx.fillStyle='#f97316'; obstacles.forEach(o=>ctx.fillRect(o.x-12,o.y,24,24)); }
-    function destroy(){ window.removeEventListener('keydown', onKey); canvas.removeEventListener('touchmove', onTouch); }
-    return {start, update, render, destroy, restart(){ obstacles.length = 0; }};
-  }
-
-  if(id === 'space'){
-    // Space shooter: player at bottom, shoot bullets
-    let shipX = canvas.width/2;
-    const bullets = [];
-    const enemies = [];
-    const stars = Array.from({length:80}, ()=>({x:Math.random()*canvas.width, y:Math.random()*canvas.height}));
-    function onKey(e){ if(e.key === 'ArrowLeft') shipX -= 20; if(e.key === 'ArrowRight') shipX += 20; if(e.key === ' ') bullets.push({x:shipX, y:canvas.height-60}); }
-    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); shipX = t.clientX - rect.left; bullets.push({x:shipX, y:canvas.height-60}); }
-    function start(){ window.addEventListener('keydown', onKey); canvas.addEventListener('touchstart', onTouch, {passive:true}); }
-    function update(dt){
-      if(Math.random() < 0.02) enemies.push({x:40 + Math.random()*(canvas.width-80), y:-20, vy: 40 + Math.random()*80, r: 12});
-      bullets.forEach(b => b.y -= 400 * dt);
-      enemies.forEach(e => e.y += e.vy * dt);
-      // collisions
-      bullets.forEach(b => enemies.forEach(e => { if(Math.hypot(b.x-e.x,b.y-e.y) < e.r+4){ e.dead = true; b.dead = true; } }));
-      // cleanup
-      for(let i = bullets.length-1;i>=0;i--) if(bullets[i].y < -20 || bullets[i].dead) bullets.splice(i,1);
-      for(let i = enemies.length-1;i>=0;i--) if(enemies[i].y > canvas.height+40 || enemies[i].dead) enemies.splice(i,1);
-    }
-    function render(){ clear(); ctx.fillStyle='#0ea5e9'; stars.forEach(s=>{ s.y += 10 * 1/60; if(s.y > canvas.height) s.y = 0; ctx.fillRect(s.x, s.y, 1,1); }); ctx.fillStyle='#38bdf8'; ctx.beginPath(); ctx.moveTo(shipX, canvas.height-40); ctx.lineTo(shipX-12, canvas.height-10); ctx.lineTo(shipX+12, canvas.height-10); ctx.closePath(); ctx.fill(); ctx.fillStyle='#facc15'; bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-10,4,10)); ctx.fillStyle='#f97316'; enemies.forEach(e=>{ ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); }); }
-    function destroy(){ window.removeEventListener('keydown', onKey); canvas.removeEventListener('touchstart', onTouch); }
-    return {start, update, render, destroy, restart(){ bullets.length = 0; enemies.length = 0; }};
-  }
-
-  if(id === 'aim'){
-    // Aim trainer: click targets
-    let target = spawnTarget();
-    let score = 0;
-    function spawnTarget(){ return {x: 40 + Math.random()*(canvas.width-80), y: 60 + Math.random()*(canvas.height-120), r: 22}; }
-    function hit(x,y){ if(Math.hypot(x-target.x,y-target.y) <= target.r){ score++; target = spawnTarget(); } }
-    function onClick(e){ hit(e.offsetX, e.offsetY); }
-    function onTouch(e){ const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); hit(t.clientX-rect.left, t.clientY-rect.top); }
-    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onTouch, {passive:true}); }
-    function update(dt){}
-    function render(){ clear(); ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(target.x,target.y,target.r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#e6eef8'; ctx.font='18px system-ui'; ctx.fillText('Score: '+score, 12, 28); }
-    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onTouch); }
-    return {start, update, render, destroy, restart(){ score = 0; target = spawnTarget(); }};
-  }
-
-  if(id === 'reaction'){
-    // Reaction: wait random, then measure
-    let waiting = true, startTime = 0, lastResult = null;
-    function schedule(){ waiting = true; lastResult = null; setTimeout(()=>{ waiting = false; startTime = performance.now(); }, 1000 + Math.random()*2500); }
-    function onClick(){ if(!waiting){ lastResult = Math.round(performance.now() - startTime) + ' ms'; schedule(); } else { lastResult = 'Too early'; schedule(); } }
-    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onClick, {passive:true}); schedule(); }
-    function update(dt){}
-    function render(){ clear(); ctx.fillStyle = waiting ? '#111827' : '#16a34a'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6eef8'; ctx.font='28px system-ui'; ctx.fillText(lastResult || (waiting ? 'Warte...' : 'Klick!'), 20, 60); }
-    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onClick); }
-    return {start, update, render, destroy, restart: schedule};
-  }
-
-  if(id === 'memory'){
-    // Memory: show numbers then prompt (simple)
-    let seq = [];
-    let index = 0;
-    let showing = false;
-    let timer = 0;
-    function newRound(){ seq.push(Math.floor(Math.random()*9)+1); index = 0; showing = true; timer = 0; }
-    function onClick(){ if(!showing){ newRound(); } }
-    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onClick, {passive:true}); newRound(); }
-    function update(dt){ if(showing){ timer += dt; if(timer > 0.9){ index++; timer = 0; if(index >= seq.length) showing = false; } } }
-    function render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.font='20px system-ui'; if(showing){ ctx.font='64px system-ui'; ctx.fillText(seq[index] || '', canvas.width/2 - 12, canvas.height/2); } else { ctx.fillText('Tap to show next', 20, 40); } }
-    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onClick); }
-    return {start, update, render, destroy, restart: newRound};
-  }
-
-  if(id === 'clicker'){
-    // Clicker: simple idle with tycoon callback
-    let money = 0, clickPower = 1, passive = 0, multiplier = 1, prestige = 0;
-    let upgrades = [{name:'+1', cost:10, bought:false}, {name:'Auto', cost:100, bought:false}];
-    function onClick(){ money += clickPower * multiplier; }
-    function onKey(e){ if(e.key === ' ') onClick(); if(e.key === 'u'){ const up = upgrades.find(u=>!u.bought); if(up && money >= up.cost){ money -= up.cost; up.bought = true; if(up.name === '+1') clickPower += 1; if(up.name === 'Auto') passive += 0.5; } } }
-    function start(){ canvas.addEventListener('click', onClick); canvas.addEventListener('touchstart', onClick, {passive:true}); window.addEventListener('keydown', onKey); }
-    let last = performance.now();
-    function update(dt){
-      money += passive * multiplier * dt;
-      // report to tycoon panel
-      tycoonCallback && tycoonCallback({money, passive, multiplier, prestige, achievements: upgrades.filter(u=>u.bought).map(u=>u.name), clickPower});
-    }
-    function render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.font='28px system-ui'; ctx.fillText('€ ' + Math.floor(money), 20, 50); ctx.font='16px system-ui'; ctx.fillText('Tap / Space to earn', 20, 90); ctx.fillText('U = buy upgrade', 20, 120); upgrades.forEach((u,i)=>{ ctx.fillStyle = u.bought ? '#4ade80' : '#9ca3af'; ctx.fillText(`${u.name} ${u.bought ? '✓' : u.cost+'$'}`, 20, 160 + i*26); }); }
-    function destroy(){ canvas.removeEventListener('click', onClick); canvas.removeEventListener('touchstart', onClick); window.removeEventListener('keydown', onKey); }
-    return {start, update, render, destroy, restart(){ money = 0; passive = 0; clickPower = 1; upgrades.forEach(u=>u.bought=false); }};
-  }
-
-  // fallback: blank
-  return {
-    start(){},
-    update(){},
-    render(){ clear(); ctx.fillStyle='#e6eef8'; ctx.font='20px system-ui'; ctx.fillText('No game', 20, 40); },
-    destroy(){},
-    restart(){}
-  };
-}
-
-/* ====== Init ====== */
-renderCards();
-fitCanvas();
-
-/* ====== Quick open tycoon button ====== */
-document.getElementById('btnOpenTycoon').addEventListener('click', ()=>openGame('clicker'));
-
-/* ====== Keyboard: ESC to close overlay ====== */
-window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && overlay.classList.contains('active')) closeGame(); });
-
-/* ====== Prevent accidental scrolling on touch while playing overlay ====== */
-overlay.addEventListener('touchmove', (e)=>{ if(overlay.classList.contains('active')) e.preventDefault(); }, {passive:false});
 </script>
 </body>
 </html>
