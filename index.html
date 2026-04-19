@@ -2,1288 +2,569 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Game Portal – Mega Tycoon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Portal</title>
+
 <style>
-:root {
-    --bg: #020617;
-    --bg-alt: #0b1220;
-    --card: #111827;
-    --card-soft: #020617;
-    --accent: #38bdf8;
-    --accent-soft: rgba(56,189,248,0.15);
-    --accent-strong: #0ea5e9;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --danger: #f97373;
-    --success: #4ade80;
-    --radius: 16px;
-}
-
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
-
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
-    color: var(--text);
-}
-
 body {
-    display: flex;
-    flex-direction: column;
+    margin: 0;
+    background: radial-gradient(circle at top, #1f2937 0, #020617 60%);
+    font-family: system-ui;
+    color: #e5e7eb;
 }
 
-/* HEADER / PORTAL BAR */
-
-.header {
-    padding: 14px 18px 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(2,6,23,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid #1f2937;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-.header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.header-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
+/* HEADER */
+header {
+    padding: 16px;
+    text-align: center;
+    font-size: 22px;
     font-weight: 600;
-    letter-spacing: 0.08em;
-}
-
-.header-logo {
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    background: radial-gradient(circle at 30% 30%, #38bdf8, #0ea5e9 40%, #020617 100%);
-    box-shadow: 0 0 18px rgba(56,189,248,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-.header-sub {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: var(--muted);
-}
-
-.header-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.header-badge {
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid #1f2937;
-    background: rgba(15,23,42,0.9);
-}
-
-/* MAIN LAYOUT */
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 12px 12px 16px;
-    gap: 12px;
-}
-
-/* FILTER / CATEGORY BAR */
-
-.filter-bar {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-}
-
-.filter-chip {
-    flex-shrink: 0;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid #1f2937;
-    background: rgba(15,23,42,0.9);
-    font-size: 11px;
-    color: var(--muted);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.filter-chip.active {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--accent-strong);
-}
-
-/* GAME LIST */
-
-.portal-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 10px;
-}
-
-.game-card {
-    position: relative;
-    border-radius: var(--radius);
-    padding: 10px 10px 12px;
-    background: radial-gradient(circle at top, #111827 0, #020617 80%);
-    border: 1px solid #1f2937;
-    overflow: hidden;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-
-.game-card::before {
-    content: "";
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(circle at top, rgba(56,189,248,0.12), transparent 60%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.game-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent);
-    box-shadow: 0 14px 30px rgba(15,23,42,0.8);
-}
-
-.game-card:hover::before {
-    opacity: 1;
-}
-
-.game-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.game-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 12px;
-    background: radial-gradient(circle at top, #0f172a 0, #020617 80%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-.game-title {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.game-title-main {
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.game-title-sub {
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.game-tags {
-    display: flex;
-    gap: 6px;
-    font-size: 10px;
-    margin-top: 2px;
-}
-
-.game-tag {
-    padding: 2px 6px;
-    border-radius: 999px;
-    border: 1px solid #1f2937;
-    background: rgba(15,23,42,0.9);
-    color: var(--muted);
-}
-
-.game-desc {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 4px;
-}
-
-/* FULLSCREEN GAME OVERLAY */
-
-.game-overlay {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #020617 0, #000 80%);
-    display: none;
-    flex-direction: column;
-    z-index: 50;
-}
-
-.game-overlay.active {
-    display: flex;
-}
-
-.game-overlay-header {
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     background: rgba(2,6,23,0.96);
     border-bottom: 1px solid #1f2937;
 }
 
-.game-overlay-left {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+/* GAME GRID */
+#gameMenu {
+    padding: 18px;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 
-.game-overlay-title {
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.game-overlay-sub {
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.game-overlay-right {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.btn {
-    border-radius: 999px;
-    border: 1px solid #1f2937;
-    background: rgba(15,23,42,0.9);
-    color: var(--text);
-    font-size: 11px;
-    padding: 5px 10px;
+.gameBtn {
+    background: radial-gradient(circle at top, #1f2937 0, #020617 80%);
+    border-radius: 16px;
+    padding: 22px 10px;
+    text-align: center;
+    font-size: 18px;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    border: 1px solid #1f2937;
+    box-shadow: 0 10px 20px rgba(15,23,42,0.7);
+    transition: 0.18s;
+}
+.gameBtn span {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+.gameBtn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 16px 30px rgba(15,23,42,0.9);
+    border-color: #38bdf8;
 }
 
-.btn:hover {
-    background: #111827;
-    border-color: #374151;
-    transform: translateY(-1px);
-}
-
-.btn-primary {
-    border-color: var(--accent);
-    background: radial-gradient(circle at top, #0ea5e9 0, #0369a1 60%, #020617 100%);
-    color: #e0f2fe;
-    box-shadow: 0 10px 25px rgba(56,189,248,0.35);
-}
-
-.btn-primary:hover {
-    background: radial-gradient(circle at top, #38bdf8 0, #0284c7 60%, #020617 100%);
-}
-
-.btn-ghost {
-    background: transparent;
-    border-color: transparent;
-    color: var(--muted);
-}
-
-.btn-ghost:hover {
-    border-color: #1f2937;
-    background: rgba(15,23,42,0.8);
-}
-
-/* GAME CANVAS AREA */
-
-.game-overlay-body {
-    flex: 1;
-    display: flex;
+/* FULLSCREEN GAME */
+#gameScreen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: none;
     flex-direction: column;
-    padding: 8px;
-    gap: 8px;
 }
 
-.game-info-bar {
+#topBar {
+    padding: 10px 14px;
+    background: rgba(2,6,23,0.96);
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.game-info-pill {
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid #1f2937;
-    background: rgba(15,23,42,0.9);
-}
-
-.canvas-shell {
-    flex: 1;
-    border-radius: var(--radius);
-    border: 1px solid #1f2937;
-    background: radial-gradient(circle at top, #020617 0, #000 80%);
-    overflow: hidden;
-    position: relative;
-    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    border-bottom: 1px solid #1f2937;
+    font-size: 16px;
+}
+
+#backBtn {
+    background: #1f2937;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: 1px solid #111827;
+    font-size: 14px;
+}
+#backBtn:hover {
+    background: #111827;
 }
 
 canvas {
-    max-width: 100%;
-    max-height: 100%;
-    background: radial-gradient(circle at top, #020617 0, #000 80%);
-    border-radius: 12px;
-    image-rendering: pixelated;
+    flex: 1;
+    background: #000;
     touch-action: none;
-}
-
-.canvas-label {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: rgba(15,23,42,0.9);
-    border: 1px solid #1f2937;
-    color: var(--muted);
-}
-
-.canvas-hint {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    font-size: 11px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(15,23,42,0.9);
-    border: 1px solid #1f2937;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.canvas-hint span.key {
-    padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid #1f2937;
-    background: rgba(15,23,42,0.9);
-    font-size: 10px;
-}
-
-/* FLOATING MONEY TEXT (Tycoon) */
-
-.floating-text {
-    position: absolute;
-    pointer-events: none;
-    font-size: 11px;
-    color: #bbf7d0;
-    text-shadow: 0 0 6px rgba(22,163,74,0.8);
-    animation: floatUp 0.7s ease-out forwards;
-}
-
-@keyframes floatUp {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-20px); opacity: 0; }
-}
-
-/* RESPONSIVE */
-
-@media (min-width: 900px) {
-    .main {
-        max-width: 960px;
-        margin: 0 auto;
-    }
+    display: block;
 }
 </style>
 </head>
+
 <body>
 
-<div class="header">
-    <div class="header-left">
-        <div class="header-title">
-            <div class="header-logo">🎮</div>
-            <span>GAME PORTAL</span>
-        </div>
-        <div class="header-sub" id="headerSub">10 Games · Retro · Tycoon</div>
-    </div>
-    <div class="header-right">
-        <div class="header-badge" id="headerBadge">Canvas Engine · Touch & Keyboard</div>
-        <div>Aktives Spiel: <strong id="activeGameLabel">Keins</strong></div>
-    </div>
-</div>
+<header>🎮 Games</header>
 
-<div class="main">
-    <div class="filter-bar" id="filterBar">
-        <div class="filter-chip active" data-filter="all">Alle Spiele</div>
-        <div class="filter-chip" data-filter="retro">Retro</div>
-        <div class="filter-chip" data-filter="arcade">Arcade</div>
-        <div class="filter-chip" data-filter="tycoon">Tycoon</div>
-    </div>
+<!-- GAME MENU -->
+<div id="gameMenu"></div>
 
-    <div class="portal-grid" id="portalGrid"></div>
-</div>
-
-<!-- FULLSCREEN GAME OVERLAY -->
-<div class="game-overlay" id="gameOverlay">
-    <div class="game-overlay-header">
-        <div class="game-overlay-left">
-            <div class="game-overlay-title">
-                <button class="btn btn-ghost" id="btnBack">⬅ Menü</button>
-                <span id="overlayTitle">Spiel</span>
-            </div>
-            <div class="game-overlay-sub" id="overlaySub">Beschreibung</div>
-        </div>
-        <div class="game-overlay-right">
-            <button class="btn" id="btnRestart">⟳ Neustart</button>
-            <button class="btn btn-primary" id="btnFocus">🎯 Fokus</button>
-        </div>
+<!-- FULLSCREEN GAME -->
+<div id="gameScreen">
+    <div id="topBar">
+        <div id="gameTitle">Game</div>
+        <div id="backBtn">⬅</div>
     </div>
-    <div class="game-overlay-body">
-        <div class="game-info-bar" id="gameInfoBar"></div>
-        <div class="canvas-shell" id="canvasShell">
-            <canvas id="gameCanvas" width="480" height="320"></canvas>
-            <div class="canvas-label" id="canvasLabel">Kein Spiel aktiv</div>
-            <div class="canvas-hint" id="canvasHint" style="display:none;">
-                <span id="canvasHintText">Steuerung</span>
-                <span class="key" id="canvasHintKeys">Keys</span>
-            </div>
-        </div>
-    </div>
+    <canvas id="gameCanvas"></canvas>
 </div>
 
 <script>
-/* ============================================================
-   GAME REGISTRY
-   ============================================================ */
-
+/* ===========================
+   GAME LIST (10 GAMES)
+=========================== */
 const games = [
-    {
-        id: "snake",
-        name: "Snake Classic",
-        icon: "🟢",
-        category: "retro",
-        difficulty: "Easy",
-        tag: "RETRO",
-        description: "Klassische Snake – glattes Grid, Score, Keyboard & Touch-Steuerung.",
-        meta: ["Retro", "Endless", "Score"],
-        controls: "Pfeiltasten oder Wischgesten zum Steuern.",
-        keys: "↑ ↓ ← → / Swipe",
-        create: createSnakeGame
-    },
-    {
-        id: "megatycoon",
-        name: "Mega Tycoon",
-        icon: "🏢",
-        category: "tycoon",
-        difficulty: "Medium",
-        tag: "IDLE",
-        description: "Klick, baue, prestige – Idle-Tycoon mit Floating-Money-Animationen.",
-        meta: ["Idle", "Progress", "Save/Load"],
-        controls: "Klick/Touch oben für Geld, W/C/P/S/L/U für Aktionen.",
-        keys: "Touch + W C P S L U",
-        create: createMegaTycoonGame
-    },
-    {
-        id: "aimtrainer",
-        name: "Aim Trainer",
-        icon: "🎯",
-        category: "arcade",
-        difficulty: "Medium",
-        tag: "SKILL",
-        description: "Klick/Tap auf Targets – Reaktion & Präzision trainieren.",
-        meta: ["Arcade", "Reaction", "Score"],
-        controls: "Maus oder Touch auf Ziel.",
-        keys: "Click / Tap",
-        create: createAimTrainerGame
-    }
-    // hier könntest du beliebig weitere Spiele einhängen
+    { id:"snake",    name:"Snake",          icon:"🐍" },
+    { id:"flappy",   name:"Flappy",         icon:"🐤" },
+    { id:"pong",     name:"Pong",           icon:"🏓" },
+    { id:"breakout", name:"Breakout",       icon:"🧱" },
+    { id:"cardodge", name:"Car Dodge",      icon:"🚗" },
+    { id:"space",    name:"Space",          icon:"🚀" },
+    { id:"aim",      name:"Aim",            icon:"🎯" },
+    { id:"reaction", name:"Reaction",       icon:"⚡" },
+    { id:"memory",   name:"Memory",         icon:"🧠" },
+    { id:"clicker",  name:"Clicker",        icon:"💰" }
 ];
 
-/* ============================================================
-   PORTAL UI
-   ============================================================ */
+/* MENU RENDER */
+const menu = document.getElementById("gameMenu");
+games.forEach(g=>{
+    let b=document.createElement("div");
+    b.className="gameBtn";
+    b.innerHTML=`<span>${g.icon}</span>${g.name}`;
+    b.onclick=()=>startGame(g.id, g.name + " " + g.icon);
+    menu.appendChild(b);
+});
 
-const portalGrid = document.getElementById("portalGrid");
-const filterBar = document.getElementById("filterBar");
-const activeGameLabel = document.getElementById("activeGameLabel");
-const gameOverlay = document.getElementById("gameOverlay");
-const overlayTitle = document.getElementById("overlayTitle");
-const overlaySub = document.getElementById("overlaySub");
-const gameInfoBar = document.getElementById("gameInfoBar");
+/* FULLSCREEN HANDLING */
+const screen = document.getElementById("gameScreen");
+const title = document.getElementById("gameTitle");
+const back = document.getElementById("backBtn");
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const canvasLabel = document.getElementById("canvasLabel");
-const canvasHint = document.getElementById("canvasHint");
-const canvasHintText = document.getElementById("canvasHintText");
-const canvasHintKeys = document.getElementById("canvasHintKeys");
-const btnBack = document.getElementById("btnBack");
-const btnRestart = document.getElementById("btnRestart");
-const btnFocus = document.getElementById("btnFocus");
-const canvasShell = document.getElementById("canvasShell");
 
-let currentFilter = "all";
-let currentGame = null;
-let currentGameId = null;
-let animationId = null;
-let lastTime = 0;
+back.onclick = ()=>closeGame();
 
-const inputState = {
-    keysDown: new Set(),
-    pointer: { x: 0, y: 0, down: false }
-};
-
-function renderPortal() {
-    portalGrid.innerHTML = "";
-    const filtered = games.filter(g => currentFilter === "all" || g.category === currentFilter);
-    filtered.forEach(game => {
-        const card = document.createElement("div");
-        card.className = "game-card";
-        card.innerHTML = `
-            <div class="game-card-header">
-                <div class="game-icon">${game.icon}</div>
-                <div class="game-title">
-                    <div class="game-title-main">${game.name}</div>
-                    <div class="game-title-sub">${game.description.slice(0, 40)}...</div>
-                </div>
-            </div>
-            <div class="game-tags">
-                <div class="game-tag">${game.tag}</div>
-                <div class="game-tag">${game.difficulty}</div>
-            </div>
-            <div class="game-desc">${game.description}</div>
-        `;
-        card.addEventListener("click", () => openGame(game));
-        portalGrid.appendChild(card);
-    });
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 50;
 }
+window.onresize = resizeCanvas;
 
-filterBar.addEventListener("click", (e) => {
-    const chip = e.target.closest(".filter-chip");
-    if (!chip) return;
-    const filter = chip.dataset.filter;
-    if (!filter) return;
-    currentFilter = filter;
-    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
-    chip.classList.add("active");
-    renderPortal();
-});
+let currentGame = null;
 
-function openGame(game) {
-    stopGame();
-    currentGameId = game.id;
-    activeGameLabel.textContent = game.name;
-    overlayTitle.textContent = game.name;
-    overlaySub.textContent = game.description;
-    canvasLabel.textContent = game.name;
-    canvasHint.style.display = "flex";
-    canvasHintText.textContent = game.controls;
-    canvasHintKeys.textContent = game.keys;
-
-    gameInfoBar.innerHTML = "";
-    game.meta.forEach(m => {
-        const pill = document.createElement("div");
-        pill.className = "game-info-pill";
-        pill.textContent = m;
-        gameInfoBar.appendChild(pill);
-    });
-
-    gameOverlay.classList.add("active");
+function startGame(id, name){
+    screen.style.display="flex";
+    title.innerText=name;
     resizeCanvas();
 
-    currentGame = game.create({
-        canvas,
-        ctx,
-        input: inputState,
-        spawnFloatingText,
-        log: (msg) => console.log("[Game]", msg)
-    });
-
-    lastTime = performance.now();
-    function loop(t) {
-        const dt = (t - lastTime) / 1000;
-        lastTime = t;
-        if (currentGame && typeof currentGame.update === "function") currentGame.update(dt);
-        if (currentGame && typeof currentGame.render === "function") currentGame.render();
-        animationId = requestAnimationFrame(loop);
-    }
-    animationId = requestAnimationFrame(loop);
-}
-
-function stopGame() {
-    if (animationId !== null) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
-    if (currentGame && typeof currentGame.destroy === "function") {
-        currentGame.destroy();
-    }
     currentGame = null;
-    currentGameId = null;
+    if(id==="snake")    loadSnake();
+    if(id==="flappy")   loadFlappy();
+    if(id==="pong")     loadPong();
+    if(id==="breakout") loadBreakout();
+    if(id==="cardodge") loadCarDodge();
+    if(id==="space")    loadSpace();
+    if(id==="aim")      loadAim();
+    if(id==="reaction") loadReaction();
+    if(id==="memory")   loadMemory();
+    if(id==="clicker")  loadClicker();
 }
 
-btnBack.addEventListener("click", () => {
-    stopGame();
-    gameOverlay.classList.remove("active");
-    activeGameLabel.textContent = "Keins";
-});
+function closeGame(){
+    currentGame = null;
+    screen.style.display="none";
+}
 
-btnRestart.addEventListener("click", () => {
-    if (!currentGameId) return;
-    const game = games.find(g => g.id === currentGameId);
-    if (!game) return;
-    openGame(game);
-});
+/* ===========================
+   SNAKE
+=========================== */
+function loadSnake(){
+    let grid=20;
+    let snake=[{x:5,y:5}];
+    let dir={x:1,y:0};
+    let food={x:10,y:10};
 
-btnFocus.addEventListener("click", () => {
-    canvas.focus();
-    canvas.scrollIntoView({ behavior: "smooth", block: "center" });
-});
-
-/* ============================================================
-   INPUT HANDLING (KEYBOARD + TOUCH/MOUSE)
-   ============================================================ */
-
-window.addEventListener("keydown", (e) => {
-    inputState.keysDown.add(e.key);
-    if (currentGame && typeof currentGame.onKeyDown === "function") {
-        currentGame.onKeyDown(e);
-    }
-});
-
-window.addEventListener("keyup", (e) => {
-    inputState.keysDown.delete(e.key);
-    if (currentGame && typeof currentGame.onKeyUp === "function") {
-        currentGame.onKeyUp(e);
-    }
-});
-
-function getCanvasPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    let clientX, clientY;
-    if (e.touches && e.touches[0]) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    }
-    return {
-        x: (clientX - rect.left) * (canvas.width / rect.width),
-        y: (clientY - rect.top) * (canvas.height / rect.height)
+    document.onkeydown=e=>{
+        if(e.key==="ArrowUp"   && dir.y!==1)  dir={x:0,y:-1};
+        if(e.key==="ArrowDown" && dir.y!==-1) dir={x:0,y:1};
+        if(e.key==="ArrowLeft" && dir.x!==1)  dir={x:-1,y:0};
+        if(e.key==="ArrowRight"&& dir.x!==-1) dir={x:1,y:0};
     };
-}
 
-function pointerDown(e) {
-    e.preventDefault();
-    const pos = getCanvasPos(e);
-    inputState.pointer.x = pos.x;
-    inputState.pointer.y = pos.y;
-    inputState.pointer.down = true;
-    if (currentGame && typeof currentGame.onPointerDown === "function") {
-        currentGame.onPointerDown(pos);
-    }
-}
-
-function pointerMove(e) {
-    if (!inputState.pointer.down && !e.touches) return;
-    const pos = getCanvasPos(e);
-    inputState.pointer.x = pos.x;
-    inputState.pointer.y = pos.y;
-    if (currentGame && typeof currentGame.onPointerMove === "function") {
-        currentGame.onPointerMove(pos);
-    }
-}
-
-function pointerUp(e) {
-    const pos = getCanvasPos(e);
-    inputState.pointer.x = pos.x;
-    inputState.pointer.y = pos.y;
-    inputState.pointer.down = false;
-    if (currentGame && typeof currentGame.onPointerUp === "function") {
-        currentGame.onPointerUp(pos);
-    }
-}
-
-canvas.addEventListener("mousedown", pointerDown);
-canvas.addEventListener("mousemove", pointerMove);
-window.addEventListener("mouseup", pointerUp);
-
-canvas.addEventListener("touchstart", pointerDown, { passive: false });
-canvas.addEventListener("touchmove", pointerMove, { passive: false });
-canvas.addEventListener("touchend", pointerUp, { passive: false });
-
-/* ============================================================
-   RESIZE HANDLING
-   ============================================================ */
-
-function resizeCanvas() {
-    const rect = canvasShell.getBoundingClientRect();
-    const aspect = 16 / 9;
-    let w = rect.width - 16;
-    let h = rect.height - 16;
-    if (w / h > aspect) {
-        w = h * aspect;
-    } else {
-        h = w / aspect;
-    }
-    canvas.width = Math.floor(w);
-    canvas.height = Math.floor(h);
-}
-
-window.addEventListener("resize", () => {
-    if (gameOverlay.classList.contains("active")) {
-        resizeCanvas();
-    }
-});
-
-/* ============================================================
-   FLOATING TEXT (für Tycoon Geld-Popups)
-   ============================================================ */
-
-function spawnFloatingText(text, x, y) {
-    const div = document.createElement("div");
-    div.className = "floating-text";
-    div.textContent = text;
-    const rect = canvas.getBoundingClientRect();
-    const px = rect.left + (x / canvas.width) * rect.width;
-    const py = rect.top + (y / canvas.height) * rect.height;
-    div.style.left = px + "px";
-    div.style.top = py + "px";
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 700);
-}
-
-/* ============================================================
-   GAME: SNAKE
-   ============================================================ */
-
-function createSnakeGame({ canvas, ctx, input }) {
-    const grid = 20;
-    const cols = Math.floor(canvas.width / grid);
-    const rows = Math.floor(canvas.height / grid);
-
-    let snake = [{ x: 5, y: 5 }];
-    let dir = { x: 1, y: 0 };
-    let food = spawnFood();
-    let speed = 8;
-    let acc = 0;
-    let dead = false;
-    let score = 0;
-    let lastSwipe = null;
-
-    function spawnFood() {
-        return {
-            x: Math.floor(Math.random() * cols),
-            y: Math.floor(Math.random() * rows)
-        };
-    }
-
-    function reset() {
-        snake = [{ x: 5, y: 5 }];
-        dir = { x: 1, y: 0 };
-        food = spawnFood();
-        speed = 8;
-        acc = 0;
-        dead = false;
-        score = 0;
-    }
-
-    function handleSwipe(pos) {
-        if (!lastSwipe) {
-            lastSwipe = { x: pos.x, y: pos.y };
-            return;
-        }
-        const dx = pos.x - lastSwipe.x;
-        const dy = pos.y - lastSwipe.y;
-        const absX = Math.abs(dx);
-        const absY = Math.abs(dy);
-        if (absX < 10 && absY < 10) return;
-        if (absX > absY) {
-            if (dx > 0 && dir.x !== -1) dir = { x: 1, y: 0 };
-            if (dx < 0 && dir.x !== 1) dir = { x: -1, y: 0 };
+    canvas.ontouchstart = e=>{
+        let t=e.touches[0];
+        let cx=t.clientX, cy=t.clientY;
+        let mx=canvas.width/2, my=canvas.height/2;
+        if(Math.abs(cx-mx)>Math.abs(cy-my)){
+            dir = cx>mx ? {x:1,y:0} : {x:-1,y:0};
         } else {
-            if (dy > 0 && dir.y !== -1) dir = { x: 0, y: 1 };
-            if (dy < 0 && dir.y !== 1) dir = { x: 0, y: -1 };
+            dir = cy>my ? {x:0,y:1} : {x:0,y:-1};
         }
-        lastSwipe = { x: pos.x, y: pos.y };
-    }
-
-    return {
-        update(dt) {
-            if (dead) return;
-            acc += dt;
-            const step = 1 / speed;
-            while (acc >= step) {
-                acc -= step;
-                const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-                if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows) {
-                    dead = true;
-                    break;
-                }
-                if (snake.some(s => s.x === head.x && s.y === head.y)) {
-                    dead = true;
-                    break;
-                }
-                snake.unshift(head);
-                if (head.x === food.x && head.y === food.y) {
-                    score++;
-                    speed = Math.min(18, speed + 0.3);
-                    food = spawnFood();
-                } else {
-                    snake.pop();
-                }
-            }
-        },
-        render() {
-            ctx.fillStyle = "#020617";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = "#22c55e";
-            snake.forEach(seg => {
-                ctx.fillRect(seg.x * grid, seg.y * grid, grid - 1, grid - 1);
-            });
-
-            ctx.fillStyle = "#f97316";
-            ctx.fillRect(food.x * grid, food.y * grid, grid - 1, grid - 1);
-
-            ctx.fillStyle = "#e5e7eb";
-            ctx.font = "14px system-ui";
-            ctx.fillText(`Score: ${score}`, 10, 20);
-
-            if (dead) {
-                ctx.fillStyle = "rgba(15,23,42,0.85)";
-                ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
-                ctx.fillStyle = "#f97373";
-                ctx.font = "16px system-ui";
-                ctx.fillText("Game Over – R zum Neustart", 20, canvas.height / 2);
-            }
-        },
-        onKeyDown(e) {
-            if (e.key === "ArrowUp" && dir.y !== 1) dir = { x: 0, y: -1 };
-            if (e.key === "ArrowDown" && dir.y !== -1) dir = { x: 0, y: 1 };
-            if (e.key === "ArrowLeft" && dir.x !== 1) dir = { x: -1, y: 0 };
-            if (e.key === "ArrowRight" && dir.x !== -1) dir = { x: 1, y: 0 };
-            if (e.key === "r") reset();
-        },
-        onPointerDown(pos) {
-            lastSwipe = { x: pos.x, y: pos.y };
-        },
-        onPointerMove(pos) {
-            handleSwipe(pos);
-        },
-        onPointerUp() {
-            lastSwipe = null;
-        },
-        destroy() {}
     };
+
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        let head={x:snake[0].x+dir.x, y:snake[0].y+dir.y};
+        snake.unshift(head);
+
+        if(head.x===food.x && head.y===food.y){
+            food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)};
+        } else snake.pop();
+
+        ctx.fillStyle="lime";
+        snake.forEach(s=>ctx.fillRect(s.x*grid,s.y*grid,grid-1,grid-1));
+
+        ctx.fillStyle="red";
+        ctx.fillRect(food.x*grid,food.y*grid,grid-1,grid-1);
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
 }
 
-/* ============================================================
-   GAME: MEGA TYCOON (ausgebaut, 2D mit Animationen)
-   ============================================================ */
+/* ===========================
+   FLAPPY
+=========================== */
+function loadFlappy(){
+    let y=canvas.height/2;
+    let v=0;
+    let pipes=[];
+    let gap=120;
+    let frame=0;
 
-function createMegaTycoonGame({ canvas, ctx, input, spawnFloatingText }) {
-    let money = 0;
-    let click = 1;
-    let passive = 0;
-    let multiplier = 1;
-    let prestige = 0;
-    let totalEarned = 0;
-    let workers = 0;
-    let workerCost = 250;
-    let msg = "";
-    let msgTimer = 0;
+    function tap(){ v=-8; }
+    document.onkeydown=e=>{ if(e.key===" "){tap();} };
+    canvas.ontouchstart = ()=>tap();
 
-    const buildings = [
-        { name: "Stand", tier: "Early", cost: 10, base: 0.2, amount: 0 },
-        { name: "Shop", tier: "Early", cost: 100, base: 1, amount: 0 },
-        { name: "Factory", tier: "Mid", cost: 1000, base: 5, amount: 0 },
-        { name: "Bank", tier: "Mid", cost: 5000, base: 20, amount: 0 },
-        { name: "Corp", tier: "Late", cost: 20000, base: 100, amount: 0 },
-        { name: "MegaCorp", tier: "Late", cost: 100000, base: 400, amount: 0 }
-    ];
+    currentGame = function loop(){
+        if(!currentGame) return;
 
-    const upgrades = [
-        { name: "Better Click", cost: 200, apply: () => { click += 2; }, bought: false },
-        { name: "Double Passive", cost: 1000, apply: () => { passive *= 2; }, bought: false },
-        { name: "Worker Boost", cost: 2000, apply: () => { workers += 5; }, bought: false },
-        { name: "Mega Multiplier", cost: 5000, apply: () => { multiplier += 1; }, bought: false }
-    ];
+        frame++;
+        ctx.fillStyle="#020617";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    function prestigeThreshold() {
-        return 100000 * Math.pow(1.8, prestige);
-    }
-
-    function showMsg(text) {
-        msg = text;
-        msgTimer = 3;
-    }
-
-    function save() {
-        const data = { money, click, passive, multiplier, prestige, totalEarned, workers, workerCost, buildings, upgrades };
-        localStorage.setItem("megaTycoonPortalSave", JSON.stringify(data));
-        showMsg("Gespeichert.");
-    }
-
-    function load() {
-        const raw = localStorage.getItem("megaTycoonPortalSave");
-        if (!raw) {
-            showMsg("Kein Save gefunden.");
-            return;
+        if(frame%80===0){
+            let top = 50+Math.random()*(canvas.height-200);
+            pipes.push({x:canvas.width, top:top});
         }
-        try {
-            const d = JSON.parse(raw);
-            money = d.money ?? 0;
-            click = d.click ?? 1;
-            passive = d.passive ?? 0;
-            multiplier = d.multiplier ?? 1;
-            prestige = d.prestige ?? 0;
-            totalEarned = d.totalEarned ?? 0;
-            workers = d.workers ?? 0;
-            workerCost = d.workerCost ?? 250;
-            if (Array.isArray(d.buildings)) {
-                d.buildings.forEach((b, i) => {
-                    if (buildings[i]) {
-                        buildings[i].cost = b.cost ?? buildings[i].cost;
-                        buildings[i].amount = b.amount ?? 0;
-                    }
-                });
-            }
-            if (Array.isArray(d.upgrades)) {
-                d.upgrades.forEach((u, i) => {
-                    if (upgrades[i]) upgrades[i].bought = !!u.bought;
-                });
-            }
-            showMsg("Save geladen.");
-        } catch {
-            showMsg("Fehler beim Laden.");
-        }
-    }
 
-    function prestigeReset() {
-        const threshold = prestigeThreshold();
-        if (money < threshold) {
-            showMsg("Prestige-Schwelle noch nicht erreicht.");
-            return;
-        }
-        prestige++;
-        multiplier += 0.5;
-        money = 0;
-        passive = 0;
-        click = 1;
-        workers = 0;
-        workerCost = 250;
-        buildings.forEach(b => {
-            b.amount = 0;
-            b.cost = Math.max(10, Math.floor(b.cost / 2));
+        v+=0.5;
+        y+=v;
+
+        ctx.fillStyle="yellow";
+        ctx.fillRect(80,y,24,24);
+
+        ctx.fillStyle="#22c55e";
+        pipes.forEach(p=>{
+            p.x-=3;
+            ctx.fillRect(p.x,0,40,p.top-gap/2);
+            ctx.fillRect(p.x,p.top+gap/2,40,canvas.height);
         });
-        upgrades.forEach(u => u.bought = false);
-        showMsg("Prestige!");
-    }
 
-    function buyBuilding(index) {
-        const b = buildings[index];
-        if (!b) return;
-        if (money >= b.cost) {
-            money -= b.cost;
-            b.amount++;
-            passive += b.base;
-            b.cost = Math.floor(b.cost * 1.25);
-            showMsg(`Gekauft: ${b.name}`);
-        } else {
-            showMsg("Zu wenig Geld.");
-        }
-    }
-
-    function buyUpgrade(index) {
-        const u = upgrades[index];
-        if (!u || u.bought) return;
-        if (money >= u.cost) {
-            money -= u.cost;
-            u.bought = true;
-            u.apply();
-            showMsg(`Upgrade: ${u.name}`);
-        } else {
-            showMsg("Zu wenig Geld.");
-        }
-    }
-
-    function clickArea(x, y) {
-        if (y < canvas.height * 0.35) {
-            const gain = click * multiplier;
-            money += gain;
-            totalEarned += gain;
-            spawnFloatingText("+" + Math.floor(gain), x, y);
-        } else if (y > canvas.height * 0.45 && y < canvas.height - 40) {
-            if (x < canvas.width * 0.5) {
-                const index = Math.floor((y - canvas.height * 0.45) / 20);
-                if (index >= 0 && index < buildings.length) buyBuilding(index);
-            } else {
-                const index = Math.floor((y - canvas.height * 0.45) / 20);
-                if (index >= 0 && index < upgrades.length) buyUpgrade(index);
-            }
-        }
-    }
-
-    return {
-        update(dt) {
-            const income = (passive + workers * 0.5) * multiplier * dt;
-            money += income;
-            totalEarned += income;
-
-            if (msgTimer > 0) {
-                msgTimer -= dt;
-                if (msgTimer <= 0) msg = "";
-            }
-        },
-        render() {
-            ctx.fillStyle = "#020617";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const topH = canvas.height * 0.35;
-            const midY = canvas.height * 0.45;
-
-            const grad = ctx.createLinearGradient(0, 0, 0, topH);
-            grad.addColorStop(0, "#0f172a");
-            grad.addColorStop(1, "#020617");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, topH);
-
-            ctx.fillStyle = "#e5e7eb";
-            ctx.font = "16px system-ui";
-            ctx.fillText(`Money: ${Math.floor(money)}`, 16, 26);
-            ctx.fillText(`Click: ${click}`, 16, 48);
-            ctx.fillText(`Passive: ${passive.toFixed(1)}/s`, 16, 70);
-            ctx.fillText(`Workers: ${workers}`, 16, 92);
-
-            ctx.fillText(`x${multiplier.toFixed(1)} Mult`, canvas.width / 2, 26);
-            ctx.fillText(`Prestige: ${prestige}`, canvas.width / 2, 48);
-            ctx.fillText(`Total: ${Math.floor(totalEarned)}`, canvas.width / 2, 70);
-
-            ctx.font = "12px system-ui";
-            ctx.fillStyle = "#9ca3af";
-            ctx.fillText("Tap/Klick oben für Geld", 16, topH - 12);
-
-            const threshold = prestigeThreshold();
-            const progress = Math.min(1, money / threshold);
-            const barX = 16;
-            const barY = topH - 30;
-            const barW = canvas.width - 32;
-            const barH = 8;
-            ctx.fillStyle = "#020617";
-            ctx.fillRect(barX, barY, barW, barH);
-            ctx.fillStyle = "#1f2937";
-            ctx.fillRect(barX, barY, barW, barH);
-            ctx.fillStyle = "#22c55e";
-            ctx.fillRect(barX, barY, barW * progress, barH);
-
-            ctx.fillStyle = "#9ca3af";
-            ctx.fillText(`Prestige bei ~${Math.floor(threshold)}`, barX, barY - 4);
-
-            ctx.fillStyle = "#111827";
-            ctx.fillRect(0, midY, canvas.width, canvas.height - midY);
-
-            ctx.fillStyle = "#e5e7eb";
-            ctx.font = "13px system-ui";
-            ctx.fillText("Buildings", 16, midY + 16);
-            ctx.fillText("Upgrades", canvas.width / 2 + 16, midY + 16);
-
-            let y = midY + 34;
-            buildings.forEach(b => {
-                ctx.fillStyle = "#e5e7eb";
-                ctx.fillText(
-                    `${b.name} (${b.amount}) - ${Math.floor(b.cost)}$ (+${b.base}/s)`,
-                    16,
-                    y
-                );
-                y += 20;
-            });
-
-            let uy = midY + 34;
-            upgrades.forEach(u => {
-                ctx.fillStyle = u.bought ? "#4ade80" : "#e5e7eb";
-                const text = u.bought ? `${u.name} ✔` : `${u.name} - ${u.cost}$`;
-                ctx.fillText(text, canvas.width / 2 + 16, uy);
-                uy += 20;
-            });
-
-            ctx.font = "12px system-ui";
-            ctx.fillStyle = "#9ca3af";
-            ctx.fillText(`Worker Cost: ${Math.floor(workerCost)}$`, 16, canvas.height - 20);
-            ctx.fillText("W Worker | C Click | P Prestige | S Save | L Load | U Upgrade", 16, canvas.height - 6);
-
-            if (msg) {
-                ctx.fillStyle = "rgba(15,23,42,0.9)";
-                ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
-                ctx.fillStyle = "#e5e7eb";
-                ctx.font = "13px system-ui";
-                ctx.fillText(msg, 16, canvas.height - 16);
-            }
-        },
-        onKeyDown(e) {
-            if (e.key === "w" || e.key === "W") {
-                if (money >= workerCost) {
-                    money -= workerCost;
-                    workers++;
-                    workerCost = Math.floor(workerCost * 1.4);
-                    showMsg("Worker eingestellt.");
-                } else showMsg("Zu wenig Geld für Worker.");
-            }
-            if (e.key === "c" || e.key === "C") {
-                if (money >= 100) {
-                    money -= 100;
-                    click += 1;
-                    showMsg("Click Power erhöht.");
-                } else showMsg("Zu wenig Geld für Click Upgrade.");
-            }
-            if (e.key === "p" || e.key === "P") prestigeReset();
-            if (e.key === "s" || e.key === "S") save();
-            if (e.key === "l" || e.key === "L") load();
-            if (e.key === "u" || e.key === "U") {
-                const idx = upgrades.findIndex(u => !u.bought);
-                if (idx >= 0) buyUpgrade(idx); else showMsg("Alle Upgrades gekauft.");
-            }
-        },
-        onPointerDown(pos) {
-            clickArea(pos.x, pos.y);
-        },
-        onPointerUp() {},
-        onPointerMove() {},
-        destroy() {}
+        requestAnimationFrame(loop);
     };
+    currentGame();
 }
 
-/* ============================================================
-   GAME: AIM TRAINER (kurz, aber mit Touch)
-   ============================================================ */
+/* ===========================
+   PONG
+=========================== */
+function loadPong(){
+    let py=canvas.height/2-40;
+    let bx=canvas.width/2, by=canvas.height/2;
+    let dx=4, dy=3;
 
-function createAimTrainerGame({ canvas, ctx, input }) {
-    let target = spawnTarget();
-    let score = 0;
-    let time = 30;
-    let over = false;
+    canvas.onmousemove = e=>{
+        let rect=canvas.getBoundingClientRect();
+        py = e.clientY-rect.top-40;
+    };
+    canvas.ontouchmove = e=>{
+        let t=e.touches[0];
+        let rect=canvas.getBoundingClientRect();
+        py = t.clientY-rect.top-40;
+    };
 
-    function spawnTarget() {
-        const r = 18;
-        return {
-            x: r + Math.random() * (canvas.width - 2 * r),
-            y: r + Math.random() * (canvas.height - 2 * r),
-            r
-        };
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        bx+=dx; by+=dy;
+        if(by<0||by>canvas.height) dy*=-1;
+        if(bx<20 && by>py && by<py+80) dx*=-1;
+        if(bx>canvas.width) {bx=canvas.width/2;by=canvas.height/2;}
+
+        ctx.fillStyle="white";
+        ctx.fillRect(10,py,10,80);
+        ctx.fillRect(bx-5,by-5,10,10);
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
+}
+
+/* ===========================
+   BREAKOUT
+=========================== */
+function loadBreakout(){
+    let bx=canvas.width/2, by=canvas.height/2;
+    let dx=3, dy=-3;
+    let pw=80, px=canvas.width/2-pw/2;
+    let bricks=[];
+    let rows=4, cols=8, bw=canvas.width/cols, bh=20;
+
+    for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+            bricks.push({x:c*bw,y:60+r*bh,w:bw-2,h:bh-2,alive:true});
+        }
     }
 
-    function hit(pos) {
-        if (over) return;
-        const dx = pos.x - target.x;
-        const dy = pos.y - target.y;
-        if (Math.sqrt(dx * dx + dy * dy) <= target.r) {
+    canvas.onmousemove = e=>{
+        let rect=canvas.getBoundingClientRect();
+        px = e.clientX-rect.left-pw/2;
+    };
+    canvas.ontouchmove = e=>{
+        let t=e.touches[0];
+        let rect=canvas.getBoundingClientRect();
+        px = t.clientX-rect.left-pw/2;
+    };
+
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        bx+=dx; by+=dy;
+        if(bx<0||bx>canvas.width) dx*=-1;
+        if(by<0) dy*=-1;
+        if(by>canvas.height){
+            bx=canvas.width/2;by=canvas.height/2;
+        }
+
+        if(by>canvas.height-30 && bx>px && bx<px+pw) dy*=-1;
+
+        bricks.forEach(b=>{
+            if(!b.alive) return;
+            if(bx>b.x && bx<b.x+b.w && by>b.y && by<b.y+b.h){
+                b.alive=false;
+                dy*=-1;
+            }
+        });
+
+        ctx.fillStyle="#38bdf8";
+        ctx.fillRect(px,canvas.height-20,pw,10);
+
+        ctx.fillStyle="#f97316";
+        ctx.fillRect(bx-5,by-5,10,10);
+
+        ctx.fillStyle="#e5e7eb";
+        bricks.forEach(b=>{
+            if(b.alive) ctx.fillRect(b.x,b.y,b.w,b.h);
+        });
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
+}
+
+/* ===========================
+   CAR DODGE
+=========================== */
+function loadCarDodge(){
+    let x=canvas.width/2;
+    let obs=[];
+
+    document.onkeydown=e=>{
+        if(e.key==="ArrowLeft") x-=20;
+        if(e.key==="ArrowRight") x+=20;
+    };
+    canvas.ontouchmove = e=>{
+        let t=e.touches[0];
+        let rect=canvas.getBoundingClientRect();
+        x = t.clientX-rect.left;
+    };
+
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        if(Math.random()<0.05) obs.push({x:Math.random()*canvas.width,y:-20});
+
+        ctx.fillStyle="#22c55e";
+        ctx.fillRect(x-10,canvas.height-40,20,30);
+
+        ctx.fillStyle="#f97316";
+        obs.forEach(o=>{
+            o.y+=4;
+            ctx.fillRect(o.x-10,o.y-10,20,20);
+        });
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
+}
+
+/* ===========================
+   SPACE SHOOTER
+=========================== */
+function loadSpace(){
+    let x=canvas.width/2;
+    let bullets=[];
+    let stars=[];
+    for(let i=0;i<60;i++){
+        stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height});
+    }
+
+    document.onkeydown=e=>{
+        if(e.key==="ArrowLeft") x-=15;
+        if(e.key==="ArrowRight") x+=15;
+        if(e.key===" ") bullets.push({x:x,y:canvas.height-40});
+    };
+    canvas.ontouchmove = e=>{
+        let t=e.touches[0];
+        let rect=canvas.getBoundingClientRect();
+        x = t.clientX-rect.left;
+    };
+    canvas.ontouchstart = ()=>bullets.push({x:x,y:canvas.height-40});
+
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.fillStyle="white";
+        stars.forEach(s=>{
+            s.y+=1;
+            if(s.y>canvas.height) s.y=0;
+            ctx.fillRect(s.x,s.y,2,2);
+        });
+
+        ctx.fillStyle="#38bdf8";
+        ctx.fillRect(x-12,canvas.height-40,24,30);
+
+        ctx.fillStyle="#facc15";
+        bullets.forEach(b=>{
+            b.y-=6;
+            ctx.fillRect(b.x-2,b.y-10,4,10);
+        });
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
+}
+
+/* ===========================
+   AIM TRAINER
+=========================== */
+function loadAim(){
+    let target={x:200,y:200,r:25};
+    let score=0;
+
+    function newTarget(){
+        target.x = 40+Math.random()*(canvas.width-80);
+        target.y = 60+Math.random()*(canvas.height-120);
+    }
+
+    function hit(x,y){
+        let dx=x-target.x;
+        let dy=y-target.y;
+        if(Math.sqrt(dx*dx+dy*dy)<target.r){
             score++;
-            target = spawnTarget();
+            newTarget();
         }
     }
 
-    return {
-        update(dt) {
-            if (over) return;
-            time -= dt;
-            if (time <= 0) {
-                time = 0;
-                over = true;
-            }
-        },
-        render() {
-            ctx.fillStyle = "#020617";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = "#e5e7eb";
-            ctx.font = "16px system-ui";
-            ctx.fillText(`Score: ${score}`, 16, 24);
-            ctx.fillText(`Time: ${time.toFixed(1)}s`, 16, 44);
-
-            if (!over) {
-                ctx.beginPath();
-                ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
-                ctx.fillStyle = "#ef4444";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(target.x, target.y, target.r * 0.6, 0, Math.PI * 2);
-                ctx.fillStyle = "#f97316";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(target.x, target.y, target.r * 0.3, 0, Math.PI * 2);
-                ctx.fillStyle = "#facc15";
-                ctx.fill();
-            } else {
-                ctx.fillStyle = "rgba(15,23,42,0.85)";
-                ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
-                ctx.fillStyle = "#4ade80";
-                ctx.font = "16px system-ui";
-                ctx.fillText(`Fertig! Score: ${score} – R für Restart`, 20, canvas.height / 2);
-            }
-        },
-        onPointerDown(pos) {
-            hit(pos);
-        },
-        onKeyDown(e) {
-            if (e.key === "r") {
-                score = 0;
-                time = 30;
-                over = false;
-                target = spawnTarget();
-            }
-        },
-        destroy() {}
+    canvas.onclick = e=>hit(e.offsetX,e.offsetY);
+    canvas.ontouchstart = e=>{
+        let t=e.touches[0];
+        let rect=canvas.getBoundingClientRect();
+        hit(t.clientX-rect.left,t.clientY-rect.top);
     };
+
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.fillStyle="white";
+        ctx.font="20px Arial";
+        ctx.fillText(score,20,30);
+
+        ctx.beginPath();
+        ctx.arc(target.x,target.y,target.r,0,Math.PI*2);
+        ctx.fillStyle="#ef4444";
+        ctx.fill();
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
 }
 
-/* ============================================================
-   INIT
-   ============================================================ */
+/* ===========================
+   REACTION
+=========================== */
+function loadReaction(){
+    let waiting=true;
+    let startTime=0;
+    let msg="...";
 
-renderPortal();
-</script>
-</body>
-</html>
+    function start(){
+        waiting=true;
+        msg="...";
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        setTimeout(()=>{
+            waiting=false;
+            startTime=performance.now();
+            msg="GO!";
+        },1000+Math.random()*2000);
+    }
+
+    canvas.onclick = ()=>{
+        if(!waiting){
+            let t=performance.now()-startTime;
+            msg=t.toFixed(0)+"ms";
+            setTimeout(start,1000);
+        }
+    };
+    canvas.ontouchstart = canvas.onclick;
+
+    start();
+
+    currentGame = function loop(){
+        if(!currentGame) return;
+
+        ctx.fillStyle=waiting?"#111827":"#16a34a";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.fillStyle="white";
+        ctx.font="40px Arial";
+        ctx.fillText(msg,20,60);
+
+        requestAnimationFrame(loop);
+    };
+    currentGame();
+}
+
+/* ===========================
+   MEMORY
+=========================== */
+function loadMemory(){
+    let nums=[1,2,3,4,5].sort(()=>Math.random()-0.5);
+    let index=0;
+    let show=true;
+    let timer=0;
+
+    canvas.onclick = ()=>{
+        if(!show){
