@@ -2,740 +2,654 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>10 Game Hub – Mega Tycoon Portal</title>
+<title>Game Portal – Mega Tycoon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    :root {
-        --bg: #020617;
-        --bg-alt: #0f172a;
-        --card: #1e293b;
-        --card-hover: #334155;
-        --accent: #38bdf8;
-        --accent-soft: rgba(56, 189, 248, 0.15);
-        --danger: #f97373;
-        --success: #4ade80;
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --border-radius: 14px;
-    }
-
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
-        color: var(--text);
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    header {
-        background: rgba(2, 6, 23, 0.9);
-        backdrop-filter: blur(10px);
-        padding: 18px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #1f2937;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    header .title {
-        font-size: 22px;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    header .title span.logo {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 30% 30%, #38bdf8, #0ea5e9 40%, #0f172a 100%);
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-        font-size: 18px;
-    }
-
-    header .subtitle {
-        font-size: 12px;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-    }
-
-    header .status {
-        font-size: 12px;
-        color: var(--muted);
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
-    }
-
-    header .status span.badge {
-        padding: 3px 8px;
-        border-radius: 999px;
-        border: 1px solid #1f2937;
-        background: rgba(15, 23, 42, 0.8);
-        font-size: 11px;
-    }
-
-    main {
-        flex: 1;
-        display: grid;
-        grid-template-columns: minmax(260px, 360px) minmax(0, 1.4fr) minmax(260px, 360px);
-        gap: 16px;
-        padding: 16px;
-    }
-
-    @media (max-width: 1200px) {
-        main {
-            grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
-            grid-template-rows: auto auto;
-        }
-        .tycoon-panel {
-            grid-column: 1 / -1;
-        }
-    }
-
-    @media (max-width: 900px) {
-        main {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .panel {
-        background: rgba(15, 23, 42, 0.9);
-        border-radius: var(--border-radius);
-        border: 1px solid #1f2937;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
-        padding: 14px 14px 18px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .panel-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 4px;
-    }
-
-    .panel-header h2 {
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--muted);
-        margin: 0;
-    }
-
-    .panel-header .pill {
-        font-size: 11px;
-        padding: 3px 8px;
-        border-radius: 999px;
-        border: 1px solid #1f2937;
-        color: var(--muted);
-    }
-
-    .menu {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
-    }
-
-    .card {
-        background: radial-gradient(circle at top, #1f2937 0, #020617 80%);
-        border-radius: var(--border-radius);
-        padding: 10px 10px 12px;
-        border: 1px solid #1f2937;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        border-color: var(--accent);
-        box-shadow: 0 12px 30px rgba(56, 189, 248, 0.25);
-        background: radial-gradient(circle at top, #1f2937 0, #020617 100%);
-    }
-
-    .card-title {
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .card-title span.icon {
-        width: 20px;
-        height: 20px;
-        border-radius: 6px;
-        background: rgba(15, 23, 42, 0.9);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-    }
-
-    .card-meta {
-        font-size: 11px;
-        color: var(--muted);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .card-tag {
-        font-size: 10px;
-        padding: 2px 6px;
-        border-radius: 999px;
-        border: 1px solid #1f2937;
-        background: rgba(15, 23, 42, 0.8);
-    }
-
-    .card-difficulty {
-        font-size: 10px;
-        color: var(--muted);
-    }
-
-    .game-container {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        height: 100%;
-    }
-
-    .game-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        font-size: 12px;
-        color: var(--muted);
-    }
-
-    .game-toolbar-left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .game-toolbar-right {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .btn {
-        border-radius: 999px;
-        border: 1px solid #1f2937;
-        background: rgba(15, 23, 42, 0.9);
-        color: var(--text);
-        font-size: 11px;
-        padding: 5px 10px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-    }
-
-    .btn:hover {
-        background: #111827;
-        border-color: #374151;
-        transform: translateY(-1px);
-    }
-
-    .btn-primary {
-        border-color: var(--accent);
-        background: radial-gradient(circle at top, #0ea5e9 0, #0369a1 60%, #020617 100%);
-        color: #e0f2fe;
-        box-shadow: 0 10px 25px rgba(56, 189, 248, 0.35);
-    }
-
-    .btn-primary:hover {
-        background: radial-gradient(circle at top, #38bdf8 0, #0284c7 60%, #020617 100%);
-    }
-
-    .btn-ghost {
-        background: transparent;
-        border-color: transparent;
-        color: var(--muted);
-    }
-
-    .btn-ghost:hover {
-        border-color: #1f2937;
-        background: rgba(15, 23, 42, 0.8);
-    }
-
-    .game-meta {
-        font-size: 11px;
-        color: var(--muted);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .game-meta span {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .canvas-wrapper {
-        position: relative;
-        border-radius: var(--border-radius);
-        overflow: hidden;
-        border: 1px solid #1f2937;
-        background: radial-gradient(circle at top, #020617 0, #000 80%);
-        flex: 1;
-        min-height: 260px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    canvas {
-        background: radial-gradient(circle at top, #020617 0, #000 80%);
-        border-radius: 10px;
-        image-rendering: pixelated;
-    }
-
-    .overlay-label {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 11px;
-        padding: 3px 8px;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid #1f2937;
-        color: var(--muted);
-    }
-
-    .overlay-message {
-        position: absolute;
-        bottom: 10px;
-        left: 10px;
-        right: 10px;
-        font-size: 11px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid #1f2937;
-        color: var(--muted);
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-    }
-
-    .overlay-message span.key {
-        padding: 2px 6px;
-        border-radius: 6px;
-        border: 1px solid #1f2937;
-        background: rgba(15, 23, 42, 0.9);
-        font-size: 10px;
-    }
-
-    .log {
-        font-size: 11px;
-        color: var(--muted);
-        max-height: 80px;
-        overflow-y: auto;
-        padding-right: 4px;
-    }
-
-    .log-entry {
-        margin-bottom: 2px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
-
-    .log-entry span.time {
-        color: #4b5563;
-        margin-right: 4px;
-    }
-
-    .pill-green { color: var(--success); }
-    .pill-red { color: var(--danger); }
-    .pill-blue { color: var(--accent); }
-    .pill-yellow { color: #facc15; }
-    .pill-muted { color: var(--muted); }
-
-    /* Tycoon side panel (Portal-Style) */
-
-    .tycoon-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .tycoon-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 12px;
-        color: var(--muted);
-    }
-
-    .tycoon-header-title {
-        font-size: 13px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .tycoon-header-title span.icon {
-        width: 22px;
-        height: 22px;
-        border-radius: 8px;
-        background: radial-gradient(circle at top, #22c55e 0, #15803d 60%, #020617 100%);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-    }
-
-    .tycoon-stat-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-        margin-top: 6px;
-    }
-
-    .tycoon-stat-card {
-        background: rgba(15, 23, 42, 0.9);
-        border-radius: 10px;
-        border: 1px solid #1f2937;
-        padding: 6px 8px;
-        font-size: 11px;
-    }
-
-    .tycoon-stat-label {
-        color: var(--muted);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-    }
-
-    .tycoon-stat-value {
-        font-size: 13px;
-        margin-top: 2px;
-    }
-
-    .tycoon-progress {
-        margin-top: 8px;
-    }
-
-    .tycoon-progress-label {
-        font-size: 11px;
-        color: var(--muted);
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 4px;
-    }
-
-    .tycoon-progress-bar {
-        width: 100%;
-        height: 8px;
-        border-radius: 999px;
-        background: #020617;
-        overflow: hidden;
-        border: 1px solid #1f2937;
-    }
-
-    .tycoon-progress-fill {
-        height: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #22c55e, #a3e635);
-        width: 0%;
-        transition: width 0.2s ease;
-    }
-
-    .tycoon-list {
-        margin-top: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .tycoon-list-title {
-        font-size: 11px;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-    }
-
-    .tycoon-item {
-        background: rgba(15, 23, 42, 0.9);
-        border-radius: 10px;
-        border: 1px solid #1f2937;
-        padding: 6px 8px;
-        font-size: 11px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .tycoon-item-main {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .tycoon-item-name {
-        font-size: 11px;
-    }
-
-    .tycoon-item-sub {
-        font-size: 10px;
-        color: var(--muted);
-    }
-
-    .tycoon-item-badge {
-        font-size: 10px;
-        padding: 2px 6px;
-        border-radius: 999px;
-        border: 1px solid #1f2937;
-        background: rgba(15, 23, 42, 0.9);
-    }
-
-    .tycoon-achievements {
-        margin-top: 8px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .tycoon-achievement {
-        font-size: 10px;
-        padding: 2px 6px;
-        border-radius: 999px;
-        border: 1px solid #1f2937;
-        background: rgba(15, 23, 42, 0.9);
-        color: var(--muted);
-    }
-
-    .tycoon-achievement.active {
-        border-color: #22c55e;
-        color: #bbf7d0;
-        background: rgba(22, 163, 74, 0.15);
-    }
+:root {
+    --bg: #020617;
+    --bg-alt: #0b1220;
+    --card: #111827;
+    --card-soft: #020617;
+    --accent: #38bdf8;
+    --accent-soft: rgba(56,189,248,0.15);
+    --accent-strong: #0ea5e9;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --danger: #f97373;
+    --success: #4ade80;
+    --radius: 16px;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+    color: var(--text);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER / PORTAL BAR */
+
+.header {
+    padding: 14px 18px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(2,6,23,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #1f2937;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+}
+
+.header-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #38bdf8, #0ea5e9 40%, #020617 100%);
+    box-shadow: 0 0 18px rgba(56,189,248,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.header-sub {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+}
+
+.header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.header-badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #1f2937;
+    background: rgba(15,23,42,0.9);
+}
+
+/* MAIN LAYOUT */
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 12px 16px;
+    gap: 12px;
+}
+
+/* FILTER / CATEGORY BAR */
+
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.filter-chip {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #1f2937;
+    background: rgba(15,23,42,0.9);
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-chip.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+}
+
+/* GAME LIST */
+
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.game-card {
+    position: relative;
+    border-radius: var(--radius);
+    padding: 10px 10px 12px;
+    background: radial-gradient(circle at top, #111827 0, #020617 80%);
+    border: 1px solid #1f2937;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.game-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at top, rgba(56,189,248,0.12), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 30px rgba(15,23,42,0.8);
+}
+
+.game-card:hover::before {
+    opacity: 1;
+}
+
+.game-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.game-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+    background: radial-gradient(circle at top, #0f172a 0, #020617 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.game-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.game-title-main {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.game-title-sub {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.game-tags {
+    display: flex;
+    gap: 6px;
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+.game-tag {
+    padding: 2px 6px;
+    border-radius: 999px;
+    border: 1px solid #1f2937;
+    background: rgba(15,23,42,0.9);
+    color: var(--muted);
+}
+
+.game-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+/* FULLSCREEN GAME OVERLAY */
+
+.game-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, #020617 0, #000 80%);
+    display: none;
+    flex-direction: column;
+    z-index: 50;
+}
+
+.game-overlay.active {
+    display: flex;
+}
+
+.game-overlay-header {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(2,6,23,0.96);
+    border-bottom: 1px solid #1f2937;
+}
+
+.game-overlay-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.game-overlay-title {
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.game-overlay-sub {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.game-overlay-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.btn {
+    border-radius: 999px;
+    border: 1px solid #1f2937;
+    background: rgba(15,23,42,0.9);
+    color: var(--text);
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+    background: #111827;
+    border-color: #374151;
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    border-color: var(--accent);
+    background: radial-gradient(circle at top, #0ea5e9 0, #0369a1 60%, #020617 100%);
+    color: #e0f2fe;
+    box-shadow: 0 10px 25px rgba(56,189,248,0.35);
+}
+
+.btn-primary:hover {
+    background: radial-gradient(circle at top, #38bdf8 0, #0284c7 60%, #020617 100%);
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted);
+}
+
+.btn-ghost:hover {
+    border-color: #1f2937;
+    background: rgba(15,23,42,0.8);
+}
+
+/* GAME CANVAS AREA */
+
+.game-overlay-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+}
+
+.game-info-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.game-info-pill {
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #1f2937;
+    background: rgba(15,23,42,0.9);
+}
+
+.canvas-shell {
+    flex: 1;
+    border-radius: var(--radius);
+    border: 1px solid #1f2937;
+    background: radial-gradient(circle at top, #020617 0, #000 80%);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+canvas {
+    max-width: 100%;
+    max-height: 100%;
+    background: radial-gradient(circle at top, #020617 0, #000 80%);
+    border-radius: 12px;
+    image-rendering: pixelated;
+    touch-action: none;
+}
+
+.canvas-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid #1f2937;
+    color: var(--muted);
+}
+
+.canvas-hint {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid #1f2937;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.canvas-hint span.key {
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid #1f2937;
+    background: rgba(15,23,42,0.9);
+    font-size: 10px;
+}
+
+/* FLOATING MONEY TEXT (Tycoon) */
+
+.floating-text {
+    position: absolute;
+    pointer-events: none;
+    font-size: 11px;
+    color: #bbf7d0;
+    text-shadow: 0 0 6px rgba(22,163,74,0.8);
+    animation: floatUp 0.7s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-20px); opacity: 0; }
+}
+
+/* RESPONSIVE */
+
+@media (min-width: 900px) {
+    .main {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+}
 </style>
 </head>
 <body>
 
-<header>
-    <div>
-        <div class="title">
-            <span class="logo">🎮</span>
+<div class="header">
+    <div class="header-left">
+        <div class="header-title">
+            <div class="header-logo">🎮</div>
             <span>GAME PORTAL</span>
         </div>
-        <div class="subtitle">10 Games · Arcade · Skill · Tycoon</div>
+        <div class="header-sub" id="headerSub">10 Games · Retro · Tycoon</div>
     </div>
-    <div class="status">
-        <span class="badge">Canvas Hub · requestAnimationFrame</span>
-        <span>Aktives Spiel: <strong id="activeGameLabel">Keins</strong></span>
+    <div class="header-right">
+        <div class="header-badge" id="headerBadge">Canvas Engine · Touch & Keyboard</div>
+        <div>Aktives Spiel: <strong id="activeGameLabel">Keins</strong></div>
     </div>
-</header>
+</div>
 
-<main>
-    <!-- LEFT: GAME MENU -->
-    <section class="panel">
-        <div class="panel-header">
-            <h2>Games</h2>
-            <div class="pill">10 Spiele verfügbar</div>
+<div class="main">
+    <div class="filter-bar" id="filterBar">
+        <div class="filter-chip active" data-filter="all">Alle Spiele</div>
+        <div class="filter-chip" data-filter="retro">Retro</div>
+        <div class="filter-chip" data-filter="arcade">Arcade</div>
+        <div class="filter-chip" data-filter="tycoon">Tycoon</div>
+    </div>
+
+    <div class="portal-grid" id="portalGrid"></div>
+</div>
+
+<!-- FULLSCREEN GAME OVERLAY -->
+<div class="game-overlay" id="gameOverlay">
+    <div class="game-overlay-header">
+        <div class="game-overlay-left">
+            <div class="game-overlay-title">
+                <button class="btn btn-ghost" id="btnBack">⬅ Menü</button>
+                <span id="overlayTitle">Spiel</span>
+            </div>
+            <div class="game-overlay-sub" id="overlaySub">Beschreibung</div>
         </div>
-        <div class="menu" id="menu"></div>
-        <div class="log" id="log"></div>
-    </section>
-
-    <!-- CENTER: GAME AREA -->
-    <section class="panel">
-        <div class="game-container">
-            <div class="game-toolbar">
-                <div class="game-toolbar-left">
-                    <button class="btn btn-ghost" id="btnBack">
-                        ⬅ Zurück zum Menü
-                    </button>
-                    <span id="gameHint">Wähle ein Spiel links aus.</span>
-                </div>
-                <div class="game-toolbar-right">
-                    <button class="btn" id="btnRestart" disabled>⟳ Neustart</button>
-                    <button class="btn btn-primary" id="btnFocus">🎯 Fokus auf Canvas</button>
-                </div>
-            </div>
-            <div class="game-meta" id="gameMeta"></div>
-            <div class="canvas-wrapper">
-                <canvas id="gameCanvas" width="480" height="360"></canvas>
-                <div class="overlay-label" id="overlayLabel">Kein Spiel aktiv</div>
-                <div class="overlay-message" id="overlayMessage" style="display:none;">
-                    <span id="overlayText">Steuerung wird hier angezeigt.</span>
-                    <span class="key" id="overlayKeys"></span>
-                </div>
-            </div>
+        <div class="game-overlay-right">
+            <button class="btn" id="btnRestart">⟳ Neustart</button>
+            <button class="btn btn-primary" id="btnFocus">🎯 Fokus</button>
         </div>
-    </section>
-
-    <!-- RIGHT: MEGA TYCOON PORTAL PANEL -->
-    <section class="panel tycoon-panel">
-        <div class="panel-header">
-            <h2>Mega Tycoon</h2>
-            <div class="pill">Idle · Progress</div>
-        </div>
-
-        <div class="tycoon-header">
-            <div class="tycoon-header-title">
-                <span class="icon">🏢</span>
-                <span>Tycoon Overview</span>
-            </div>
-            <span id="tycoonStatusLabel">Inaktiv</span>
-        </div>
-
-        <div class="tycoon-stat-grid">
-            <div class="tycoon-stat-card">
-                <div class="tycoon-stat-label">Money</div>
-                <div class="tycoon-stat-value" id="tycoonMoney">0</div>
-            </div>
-            <div class="tycoon-stat-card">
-                <div class="tycoon-stat-label">Passive / s</div>
-                <div class="tycoon-stat-value" id="tycoonPassive">0</div>
-            </div>
-            <div class="tycoon-stat-card">
-                <div class="tycoon-stat-label">Multiplier</div>
-                <div class="tycoon-stat-value" id="tycoonMult">x1.0</div>
-            </div>
-            <div class="tycoon-stat-card">
-                <div class="tycoon-stat-label">Prestige</div>
-                <div class="tycoon-stat-value" id="tycoonPrestige">0</div>
+    </div>
+    <div class="game-overlay-body">
+        <div class="game-info-bar" id="gameInfoBar"></div>
+        <div class="canvas-shell" id="canvasShell">
+            <canvas id="gameCanvas" width="480" height="320"></canvas>
+            <div class="canvas-label" id="canvasLabel">Kein Spiel aktiv</div>
+            <div class="canvas-hint" id="canvasHint" style="display:none;">
+                <span id="canvasHintText">Steuerung</span>
+                <span class="key" id="canvasHintKeys">Keys</span>
             </div>
         </div>
-
-        <div class="tycoon-progress">
-            <div class="tycoon-progress-label">
-                <span>Nächste Prestige-Schwelle</span>
-                <span id="tycoonPrestigeInfo">0 / 100.000</span>
-            </div>
-            <div class="tycoon-progress-bar">
-                <div class="tycoon-progress-fill" id="tycoonPrestigeBar"></div>
-            </div>
-        </div>
-
-        <div class="tycoon-list">
-            <div class="tycoon-list-title">Kernwerte</div>
-            <div class="tycoon-item">
-                <div class="tycoon-item-main">
-                    <div class="tycoon-item-name">Click Power</div>
-                    <div class="tycoon-item-sub" id="tycoonClickInfo">+1 pro Klick</div>
-                </div>
-                <span class="tycoon-item-badge" id="tycoonWorkersInfo">0 Worker</span>
-            </div>
-            <div class="tycoon-item">
-                <div class="tycoon-item-main">
-                    <div class="tycoon-item-name">Total Earned</div>
-                    <div class="tycoon-item-sub" id="tycoonTotalEarned">0 insgesamt verdient</div>
-                </div>
-                <span class="tycoon-item-badge" id="tycoonNextPrestigeBadge">Prestige x1.0</span>
-            </div>
-        </div>
-
-        <div class="tycoon-list">
-            <div class="tycoon-list-title">Letzte Events</div>
-            <div class="log" id="tycoonLog" style="max-height:120px;"></div>
-        </div>
-
-        <div class="tycoon-list">
-            <div class="tycoon-list-title">Achievements</div>
-            <div class="tycoon-achievements" id="tycoonAchievements">
-                <!-- Dynamisch gefüllt -->
-            </div>
-        </div>
-    </section>
-</main>
+    </div>
+</div>
 
 <script>
 /* ============================================================
-   CORE ENGINE
+   GAME REGISTRY
    ============================================================ */
 
+const games = [
+    {
+        id: "snake",
+        name: "Snake Classic",
+        icon: "🟢",
+        category: "retro",
+        difficulty: "Easy",
+        tag: "RETRO",
+        description: "Klassische Snake – glattes Grid, Score, Keyboard & Touch-Steuerung.",
+        meta: ["Retro", "Endless", "Score"],
+        controls: "Pfeiltasten oder Wischgesten zum Steuern.",
+        keys: "↑ ↓ ← → / Swipe",
+        create: createSnakeGame
+    },
+    {
+        id: "megatycoon",
+        name: "Mega Tycoon",
+        icon: "🏢",
+        category: "tycoon",
+        difficulty: "Medium",
+        tag: "IDLE",
+        description: "Klick, baue, prestige – Idle-Tycoon mit Floating-Money-Animationen.",
+        meta: ["Idle", "Progress", "Save/Load"],
+        controls: "Klick/Touch oben für Geld, W/C/P/S/L/U für Aktionen.",
+        keys: "Touch + W C P S L U",
+        create: createMegaTycoonGame
+    },
+    {
+        id: "aimtrainer",
+        name: "Aim Trainer",
+        icon: "🎯",
+        category: "arcade",
+        difficulty: "Medium",
+        tag: "SKILL",
+        description: "Klick/Tap auf Targets – Reaktion & Präzision trainieren.",
+        meta: ["Arcade", "Reaction", "Score"],
+        controls: "Maus oder Touch auf Ziel.",
+        keys: "Click / Tap",
+        create: createAimTrainerGame
+    }
+    // hier könntest du beliebig weitere Spiele einhängen
+];
+
+/* ============================================================
+   PORTAL UI
+   ============================================================ */
+
+const portalGrid = document.getElementById("portalGrid");
+const filterBar = document.getElementById("filterBar");
+const activeGameLabel = document.getElementById("activeGameLabel");
+const gameOverlay = document.getElementById("gameOverlay");
+const overlayTitle = document.getElementById("overlayTitle");
+const overlaySub = document.getElementById("overlaySub");
+const gameInfoBar = document.getElementById("gameInfoBar");
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const menuEl = document.getElementById("menu");
-const logEl = document.getElementById("log");
-const activeGameLabel = document.getElementById("activeGameLabel");
-const gameHint = document.getElementById("gameHint");
-const gameMeta = document.getElementById("gameMeta");
-const overlayLabel = document.getElementById("overlayLabel");
-const overlayMessage = document.getElementById("overlayMessage");
-const overlayText = document.getElementById("overlayText");
-const overlayKeys = document.getElementById("overlayKeys");
+const canvasLabel = document.getElementById("canvasLabel");
+const canvasHint = document.getElementById("canvasHint");
+const canvasHintText = document.getElementById("canvasHintText");
+const canvasHintKeys = document.getElementById("canvasHintKeys");
 const btnBack = document.getElementById("btnBack");
 const btnRestart = document.getElementById("btnRestart");
 const btnFocus = document.getElementById("btnFocus");
+const canvasShell = document.getElementById("canvasShell");
 
-/* Tycoon UI Elements */
-const tycoonStatusLabel = document.getElementById("tycoonStatusLabel");
-const tycoonMoneyEl = document.getElementById("tycoonMoney");
-const tycoonPassiveEl = document.getElementById("tycoonPassive");
-const tycoonMultEl = document.getElementById("tycoonMult");
-const tycoonPrestigeEl = document.getElementById("tycoonPrestige");
-const tycoonPrestigeInfoEl = document.getElementById("tycoonPrestigeInfo");
-const tycoonPrestigeBarEl = document.getElementById("tycoonPrestigeBar");
-const tycoonClickInfoEl = document.getElementById("tycoonClickInfo");
-const tycoonWorkersInfoEl = document.getElementById("tycoonWorkersInfo");
-const tycoonTotalEarnedEl = document.getElementById("tycoonTotalEarned");
-const tycoonNextPrestigeBadgeEl = document.getElementById("tycoonNextPrestigeBadge");
-const tycoonLogEl = document.getElementById("tycoonLog");
-const tycoonAchievementsEl = document.getElementById("tycoonAchievements");
-
+let currentFilter = "all";
 let currentGame = null;
 let currentGameId = null;
 let animationId = null;
-let lastTimestamp = 0;
+let lastTime = 0;
 
 const inputState = {
     keysDown: new Set(),
-    mouse: { x: 0, y: 0, down: false }
+    pointer: { x: 0, y: 0, down: false }
 };
 
-function log(message, type = "info") {
-    const entry = document.createElement("div");
-    entry.className = "log-entry";
-    const time = new Date().toLocaleTimeString("de-DE", { hour12: false });
-    const colorClass =
-        type === "success" ? "pill-green" :
-        type === "error" ? "pill-red" :
-        type === "event" ? "pill-blue" :
-        "pill-muted";
-
-    entry.innerHTML = `<span class="time">[${time}]</span><span class="${colorClass}">${message}</span>`;
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
+function renderPortal() {
+    portalGrid.innerHTML = "";
+    const filtered = games.filter(g => currentFilter === "all" || g.category === currentFilter);
+    filtered.forEach(game => {
+        const card = document.createElement("div");
+        card.className = "game-card";
+        card.innerHTML = `
+            <div class="game-card-header">
+                <div class="game-icon">${game.icon}</div>
+                <div class="game-title">
+                    <div class="game-title-main">${game.name}</div>
+                    <div class="game-title-sub">${game.description.slice(0, 40)}...</div>
+                </div>
+            </div>
+            <div class="game-tags">
+                <div class="game-tag">${game.tag}</div>
+                <div class="game-tag">${game.difficulty}</div>
+            </div>
+            <div class="game-desc">${game.description}</div>
+        `;
+        card.addEventListener("click", () => openGame(game));
+        portalGrid.appendChild(card);
+    });
 }
 
-function clearCanvas() {
-    ctx.fillStyle = "#020617";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+filterBar.addEventListener("click", (e) => {
+    const chip = e.target.closest(".filter-chip");
+    if (!chip) return;
+    const filter = chip.dataset.filter;
+    if (!filter) return;
+    currentFilter = filter;
+    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    renderPortal();
+});
+
+function openGame(game) {
+    stopGame();
+    currentGameId = game.id;
+    activeGameLabel.textContent = game.name;
+    overlayTitle.textContent = game.name;
+    overlaySub.textContent = game.description;
+    canvasLabel.textContent = game.name;
+    canvasHint.style.display = "flex";
+    canvasHintText.textContent = game.controls;
+    canvasHintKeys.textContent = game.keys;
+
+    gameInfoBar.innerHTML = "";
+    game.meta.forEach(m => {
+        const pill = document.createElement("div");
+        pill.className = "game-info-pill";
+        pill.textContent = m;
+        gameInfoBar.appendChild(pill);
+    });
+
+    gameOverlay.classList.add("active");
+    resizeCanvas();
+
+    currentGame = game.create({
+        canvas,
+        ctx,
+        input: inputState,
+        spawnFloatingText,
+        log: (msg) => console.log("[Game]", msg)
+    });
+
+    lastTime = performance.now();
+    function loop(t) {
+        const dt = (t - lastTime) / 1000;
+        lastTime = t;
+        if (currentGame && typeof currentGame.update === "function") currentGame.update(dt);
+        if (currentGame && typeof currentGame.render === "function") currentGame.render();
+        animationId = requestAnimationFrame(loop);
+    }
+    animationId = requestAnimationFrame(loop);
 }
 
 function stopGame() {
@@ -748,58 +662,28 @@ function stopGame() {
     }
     currentGame = null;
     currentGameId = null;
-    activeGameLabel.textContent = "Keins";
-    overlayLabel.textContent = "Kein Spiel aktiv";
-    overlayMessage.style.display = "none";
-    gameMeta.innerHTML = "";
-    gameHint.textContent = "Wähle ein Spiel links aus.";
-    btnRestart.disabled = true;
-    clearCanvas();
 }
 
-function startGame(id) {
+btnBack.addEventListener("click", () => {
     stopGame();
-    const gameDef = games.find(g => g.id === id);
-    if (!gameDef) return;
+    gameOverlay.classList.remove("active");
+    activeGameLabel.textContent = "Keins";
+});
 
-    currentGameId = id;
-    currentGame = gameDef.create({ canvas, ctx, input: inputState, log, tycoonUI: tycoonUIBridge });
+btnRestart.addEventListener("click", () => {
+    if (!currentGameId) return;
+    const game = games.find(g => g.id === currentGameId);
+    if (!game) return;
+    openGame(game);
+});
 
-    activeGameLabel.textContent = gameDef.name;
-    overlayLabel.textContent = gameDef.name;
-    overlayMessage.style.display = "flex";
-    overlayText.textContent = gameDef.controls;
-    overlayKeys.textContent = gameDef.keys;
-    gameHint.textContent = gameDef.description;
-    btnRestart.disabled = false;
-
-    gameMeta.innerHTML = `
-        <span>Genre: <strong>${gameDef.genre}</strong></span>
-        <span>Schwierigkeit: <strong>${gameDef.difficulty}</strong></span>
-        <span>Modus: <strong>${gameDef.mode}</strong></span>
-    `;
-
-    log(`Starte "${gameDef.name}"`, "event");
-
-    lastTimestamp = performance.now();
-    function loop(timestamp) {
-        const dt = (timestamp - lastTimestamp) / 1000;
-        lastTimestamp = timestamp;
-
-        if (currentGame && typeof currentGame.update === "function") {
-            currentGame.update(dt);
-        }
-        if (currentGame && typeof currentGame.render === "function") {
-            currentGame.render();
-        }
-
-        animationId = requestAnimationFrame(loop);
-    }
-    animationId = requestAnimationFrame(loop);
-}
+btnFocus.addEventListener("click", () => {
+    canvas.focus();
+    canvas.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 
 /* ============================================================
-   INPUT HANDLING
+   INPUT HANDLING (KEYBOARD + TOUCH/MOUSE)
    ============================================================ */
 
 window.addEventListener("keydown", (e) => {
@@ -816,774 +700,590 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
-canvas.addEventListener("mousemove", (e) => {
+function getCanvasPos(e) {
     const rect = canvas.getBoundingClientRect();
-    inputState.mouse.x = e.clientX - rect.left;
-    inputState.mouse.y = e.clientY - rect.top;
-    if (currentGame && typeof currentGame.onMouseMove === "function") {
-        currentGame.onMouseMove(e, inputState.mouse);
+    let clientX, clientY;
+    if (e.touches && e.touches[0]) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
     }
-});
-
-canvas.addEventListener("mousedown", (e) => {
-    inputState.mouse.down = true;
-    if (currentGame && typeof currentGame.onMouseDown === "function") {
-        currentGame.onMouseDown(e, inputState.mouse);
-    }
-});
-
-canvas.addEventListener("mouseup", (e) => {
-    inputState.mouse.down = false;
-    if (currentGame && typeof currentGame.onMouseUp === "function") {
-        currentGame.onMouseUp(e, inputState.mouse);
-    }
-});
-
-/* ============================================================
-   UI BUTTONS
-   ============================================================ */
-
-btnBack.addEventListener("click", () => {
-    stopGame();
-    log("Zurück zum Menü", "info");
-});
-
-btnRestart.addEventListener("click", () => {
-    if (currentGameId) {
-        log(`Neustart von "${currentGameId}"`, "event");
-        startGame(currentGameId);
-    }
-});
-
-btnFocus.addEventListener("click", () => {
-    canvas.focus();
-    canvas.scrollIntoView({ behavior: "smooth", block: "center" });
-});
-
-/* ============================================================
-   GAME DEFINITIONS (Arcade etc. – wie zuvor, leicht gekürzt)
-   ============================================================ */
-
-const games = [
-    /* Snake, Flappy, Breakout, Pong, Car Dodge, Space Shooter,
-       Platformer, Memory, Reaction, Aim – identisch wie vorher,
-       nur aus Platzgründen hier nicht kommentiert.
-       (Ich lasse sie vollständig drin, damit du direkt laufen lassen kannst.)
-    */
-    {
-        id: "snake",
-        name: "Snake Neo",
-        icon: "🟩",
-        genre: "Retro",
-        difficulty: "Mittel",
-        mode: "Endless",
-        description: "Klassische Snake mit glattem Movement und Score-Anzeige.",
-        controls: "Pfeiltasten zum Steuern.",
-        keys: "↑ ↓ ← →",
-        create({ canvas, ctx, input, log }) {
-            const grid = 20;
-            const cols = Math.floor(canvas.width / grid);
-            const rows = Math.floor(canvas.height / grid);
-
-            let snake = [{ x: 5, y: 5 }];
-            let dir = { x: 1, y: 0 };
-            let food = spawnFood();
-            let speed = 8;
-            let acc = 0;
-            let score = 0;
-            let dead = false;
-
-            function spawnFood() {
-                return {
-                    x: Math.floor(Math.random() * cols),
-                    y: Math.floor(Math.random() * rows)
-                };
-            }
-
-            function reset() {
-                snake = [{ x: 5, y: 5 }];
-                dir = { x: 1, y: 0 };
-                food = spawnFood();
-                score = 0;
-                dead = false;
-                log("Snake zurückgesetzt.", "info");
-            }
-
-            return {
-                update(dt) {
-                    if (dead) return;
-                    acc += dt;
-                    const step = 1 / speed;
-                    while (acc >= step) {
-                        acc -= step;
-
-                        const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-
-                        if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows) {
-                            dead = true;
-                            log(`Snake: Game Over (Score: ${score})`, "error");
-                            break;
-                        }
-
-                        if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
-                            dead = true;
-                            log(`Snake: Selbstkollision (Score: ${score})`, "error");
-                            break;
-                        }
-
-                        snake.unshift(head);
-
-                        if (head.x === food.x && head.y === food.y) {
-                            score++;
-                            food = spawnFood();
-                            speed = Math.min(18, speed + 0.3);
-                            log(`Snake: Food! Score = ${score}`, "success");
-                        } else {
-                            snake.pop();
-                        }
-                    }
-                },
-                render() {
-                    ctx.fillStyle = "#020617";
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    ctx.fillStyle = "#22c55e";
-                    snake.forEach(seg => {
-                        ctx.fillRect(seg.x * grid, seg.y * grid, grid - 1, grid - 1);
-                    });
-
-                    ctx.fillStyle = "#f97316";
-                    ctx.fillRect(food.x * grid, food.y * grid, grid - 1, grid - 1);
-
-                    ctx.fillStyle = "#e5e7eb";
-                    ctx.font = "14px system-ui";
-                    ctx.fillText(`Score: ${score}`, 10, 20);
-
-                    if (dead) {
-                        ctx.fillStyle = "rgba(15,23,42,0.8)";
-                        ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
-                        ctx.fillStyle = "#f97373";
-                        ctx.font = "16px system-ui";
-                        ctx.fillText("Game Over – R zum Neustart", 20, canvas.height / 2);
-                    }
-                },
-                onKeyDown(e) {
-                    if (e.key === "ArrowUp" && dir.y !== 1) dir = { x: 0, y: -1 };
-                    if (e.key === "ArrowDown" && dir.y !== -1) dir = { x: 0, y: 1 };
-                    if (e.key === "ArrowLeft" && dir.x !== 1) dir = { x: -1, y: 0 };
-                    if (e.key === "ArrowRight" && dir.x !== -1) dir = { x: 1, y: 0 };
-                    if (e.key === "r") reset();
-                },
-                destroy() {}
-            };
-        }
-    },
-    /* --- Flappy --- */
-    {
-        id: "flappy",
-        name: "Flappy Minimal",
-        icon: "🐤",
-        genre: "Retro",
-        difficulty: "Schwer",
-        mode: "Endless",
-        description: "Simpler Flappy Bird Clone mit Pipes und Score.",
-        controls: "Leertaste oder Klick zum Flap.",
-        keys: "SPACE / Klick",
-        create({ canvas, ctx, input, log }) {
-            let y = canvas.height / 2;
-            let v = 0;
-            const gravity = 900;
-            const flap = -280;
-            const birdX = 80;
-            let pipes = [];
-            let pipeTimer = 0;
-            let score = 0;
-            let dead = false;
-
-            function reset() {
-                y = canvas.height / 2;
-                v = 0;
-                pipes = [];
-                pipeTimer = 0;
-                score = 0;
-                dead = false;
-                log("Flappy zurückgesetzt.", "info");
-            }
-
-            function spawnPipe() {
-                const gap = 120;
-                const min = 40;
-                const max = canvas.height - gap - 40;
-                const top = Math.random() * (max - min) + min;
-                pipes.push({
-                    x: canvas.width + 40,
-                    top,
-                    gap
-                });
-            }
-
-            function flapBird() {
-                if (dead) {
-                    reset();
-                    return;
-                }
-                v = flap;
-            }
-
-            canvas.addEventListener("click", flapBird);
-
-            return {
-                update(dt) {
-                    if (dead) return;
-
-                    v += gravity * dt;
-                    y += v * dt;
-
-                    pipeTimer += dt;
-                    if (pipeTimer > 1.4) {
-                        pipeTimer = 0;
-                        spawnPipe();
-                    }
-
-                    pipes.forEach(p => p.x -= 160 * dt);
-                    pipes = pipes.filter(p => p.x > -60);
-
-                    if (y < 0 || y > canvas.height) {
-                        dead = true;
-                        log(`Flappy: Game Over (Score: ${score})`, "error");
-                    }
-
-                    pipes.forEach(p => {
-                        const inX = birdX > p.x - 20 && birdX < p.x + 40;
-                        const inY = y < p.top || y > p.top + p.gap;
-                        if (inX && inY) {
-                            dead = true;
-                            log(`Flappy: Crash (Score: ${score})`, "error");
-                        }
-                        if (!p.scored && p.x + 40 < birdX) {
-                            p.scored = true;
-                            score++;
-                            log(`Flappy: Score = ${score}`, "success");
-                        }
-                    });
-                },
-                render() {
-                    ctx.fillStyle = "#020617";
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    ctx.fillStyle = "#0ea5e9";
-                    ctx.fillRect(0, 0, canvas.width, canvas.height / 2.5);
-
-                    ctx.fillStyle = "#22c55e";
-                    pipes.forEach(p => {
-                        ctx.fillRect(p.x, 0, 40, p.top);
-                        ctx.fillRect(p.x, p.top + p.gap, 40, canvas.height - (p.top + p.gap));
-                    });
-
-                    ctx.save();
-                    ctx.translate(birdX, y);
-                    ctx.fillStyle = "#facc15";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 10, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-
-                    ctx.fillStyle = "#e5e7eb";
-                    ctx.font = "16px system-ui";
-                    ctx.fillText(`Score: ${score}`, 10, 22);
-
-                    if (dead) {
-                        ctx.fillStyle = "rgba(15,23,42,0.8)";
-                        ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
-                        ctx.fillStyle = "#f97373";
-                        ctx.font = "16px system-ui";
-                        ctx.fillText("Game Over – SPACE / Klick für Neustart", 20, canvas.height / 2);
-                    }
-                },
-                onKeyDown(e) {
-                    if (e.key === " ") {
-                        e.preventDefault();
-                        flapBird();
-                    }
-                    if (e.key === "r") reset();
-                },
-                destroy() {
-                    canvas.removeEventListener("click", flapBird);
-                }
-            };
-        }
-    },
-    /* --- Breakout, Pong, Car Dodge, Space Shooter, Platformer, Memory, Reaction, Aim
-       (identisch wie in der vorherigen Antwort – ich lasse sie hier aus Platzgründen
-        weg, aber im echten Code musst du sie drin lassen. Für dich: einfach aus der
-        letzten Antwort rüberkopieren.)
-    */
-
-    /* --- MEGA TYCOON (ausgebaut) --- */
-    {
-        id: "megatycoon",
-        name: "Mega Tycoon",
-        icon: "🏢",
-        genre: "Idle / Tycoon",
-        difficulty: "Progressiv",
-        mode: "Endless",
-        description: "Klick, baue, prestige – ein ausgebauter Idle-Tycoon mit Portal-Übersicht.",
-        controls: "Klick oben für Geld, Tasten: W/C/P/S/L/U, Maus für Buildings/Upgrades.",
-        keys: "W C P S L U + Maus",
-        create({ canvas, ctx, input, log, tycoonUI }) {
-            let money = 0;
-            let click = 1;
-            let passive = 0;
-            let multiplier = 1;
-            let prestige = 0;
-            let prestigePoints = 0;
-            let totalEarned = 0;
-
-            let workers = 0;
-            let workerCost = 250;
-
-            let msg = "";
-            let msgTimer = 0;
-
-            const buildings = [
-                { id: 0, tier: "Early", name: "Lemon Stand", cost: 10, base: 0.2, amount: 0 },
-                { id: 1, tier: "Early", name: "Kiosk", cost: 100, base: 1, amount: 0 },
-                { id: 2, tier: "Mid",   name: "Shop", cost: 1000, base: 5, amount: 0 },
-                { id: 3, tier: "Mid",   name: "Factory", cost: 5000, base: 20, amount: 0 },
-                { id: 4, tier: "Mid",   name: "Bank", cost: 20000, base: 80, amount: 0 },
-                { id: 5, tier: "Late",  name: "Corp", cost: 100000, base: 400, amount: 0 },
-                { id: 6, tier: "Late",  name: "MegaCorp", cost: 500000, base: 2000, amount: 0 },
-                { id: 7, tier: "Late",  name: "Space Station", cost: 2000000, base: 10000, amount: 0 }
-            ];
-
-            const upgrades = [
-                { id: 0, name: "Better Click I", cost: 200, apply: () => { click += 2; }, bought: false },
-                { id: 1, name: "Better Click II", cost: 2000, apply: () => { click += 5; }, bought: false },
-                { id: 2, name: "Double Passive I", cost: 5000, apply: () => { passive *= 2; }, bought: false },
-                { id: 3, name: "Worker Boost I", cost: 8000, apply: () => { workers += 5; }, bought: false },
-                { id: 4, name: "Mega Multiplier I", cost: 15000, apply: () => { multiplier += 0.5; }, bought: false },
-                { id: 5, name: "Mega Multiplier II", cost: 50000, apply: () => { multiplier += 1; }, bought: false }
-            ];
-
-            const achievements = new Set();
-            let lastEvent = performance.now();
-
-            function prestigeThreshold() {
-                return 100000 * Math.pow(1.8, prestige);
-            }
-
-            function showMsg(text) {
-                msg = text;
-                msgTimer = 3;
-                log(`Tycoon: ${text}`, "event");
-                tycoonUI.log(text);
-            }
-
-            function save() {
-                const data = {
-                    money, click, passive, multiplier, prestige,
-                    prestigePoints, workers, workerCost, buildings, upgrades, totalEarned
-                };
-                localStorage.setItem("megaTycoonSaveV2", JSON.stringify(data));
-                showMsg("Spielstand gespeichert.");
-            }
-
-            function load() {
-                const raw = localStorage.getItem("megaTycoonSaveV2");
-                if (!raw) {
-                    showMsg("Kein Save gefunden.");
-                    return;
-                }
-                try {
-                    const d = JSON.parse(raw);
-                    money = d.money ?? 0;
-                    click = d.click ?? 1;
-                    passive = d.passive ?? 0;
-                    multiplier = d.multiplier ?? 1;
-                    prestige = d.prestige ?? 0;
-                    prestigePoints = d.prestigePoints ?? 0;
-                    workers = d.workers ?? 0;
-                    workerCost = d.workerCost ?? 250;
-                    totalEarned = d.totalEarned ?? 0;
-
-                    if (Array.isArray(d.buildings)) {
-                        d.buildings.forEach((b, i) => {
-                            if (buildings[i]) {
-                                buildings[i].cost = b.cost ?? buildings[i].cost;
-                                buildings[i].amount = b.amount ?? 0;
-                            }
-                        });
-                    }
-                    if (Array.isArray(d.upgrades)) {
-                        d.upgrades.forEach((u, i) => {
-                            if (upgrades[i]) {
-                                upgrades[i].bought = !!u.bought;
-                            }
-                        });
-                    }
-                    showMsg("Spielstand geladen.");
-                } catch {
-                    showMsg("Fehler beim Laden.");
-                }
-            }
-
-            function prestigeReset() {
-                const threshold = prestigeThreshold();
-                if (money < threshold) {
-                    showMsg("Prestige-Schwelle noch nicht erreicht.");
-                    return;
-                }
-                const gained = Math.floor(Math.sqrt(money / 100000));
-                prestigePoints += gained;
-                prestige++;
-                multiplier += 0.5 + gained * 0.2;
-
-                money = 0;
-                passive = 0;
-                click = 1;
-                workers = 0;
-                workerCost = 250;
-                buildings.forEach(b => {
-                    b.amount = 0;
-                    b.cost = Math.max(10, Math.floor(b.cost / 2));
-                });
-                upgrades.forEach(u => {
-                    u.bought = false;
-                });
-                showMsg(`Prestige! +${gained} Prestige-Punkte.`);
-            }
-
-            function randomEvent() {
-                const r = Math.random();
-                if (r < 0.4) {
-                    const bonus = 1000 + Math.random() * 4000;
-                    money += bonus;
-                    showMsg(`💰 Bonus Geld: +${Math.floor(bonus)}`);
-                } else if (r < 0.8) {
-                    passive *= 1.25;
-                    showMsg("⚡ Passiver Boost +25%");
-                } else {
-                    const extra = 1 + Math.floor(Math.random() * 3);
-                    workers += extra;
-                    showMsg(`👷 Extra Worker: +${extra}`);
-                }
-            }
-
-            function checkAchievements() {
-                function unlock(id, label) {
-                    if (!achievements.has(id)) {
-                        achievements.add(id);
-                        showMsg(`Achievement: ${label}`);
-                        tycoonUI.updateAchievements(Array.from(achievements));
-                    }
-                }
-
-                if (totalEarned > 1000) unlock("starter", "Starter");
-                if (totalEarned > 10000) unlock("pro", "Pro");
-                if (totalEarned > 1000000) unlock("millionaire", "Millionär");
-                if (prestige >= 1) unlock("prestige1", "Prestige I");
-                if (prestige >= 3) unlock("prestige3", "Prestige III");
-                if (workers >= 20) unlock("workforce", "Workforce");
-            }
-
-            function buyBuilding(index) {
-                const b = buildings[index];
-                if (!b) return;
-                if (money >= b.cost) {
-                    money -= b.cost;
-                    b.amount++;
-                    passive += b.base;
-                    b.cost = Math.floor(b.cost * 1.25);
-                    showMsg(`Gekauft: ${b.name}`);
-                } else {
-                    showMsg("Zu wenig Geld.");
-                }
-            }
-
-            function buyUpgrade(index) {
-                const u = upgrades[index];
-                if (!u || u.bought) return;
-                if (money >= u.cost) {
-                    money -= u.cost;
-                    u.bought = true;
-                    u.apply();
-                    showMsg(`Upgrade: ${u.name}`);
-                } else {
-                    showMsg("Zu wenig Geld für Upgrade.");
-                }
-            }
-
-            function onClick(e) {
-                const rect = canvas.getBoundingClientRect();
-                const y = e.clientY - rect.top;
-                const x = e.clientX - rect.left;
-
-                if (y < 120) {
-                    const gain = click * multiplier;
-                    money += gain;
-                    totalEarned += gain;
-                } else if (y > 160 && y < canvas.height - 80) {
-                    if (x < canvas.width / 2) {
-                        const index = Math.floor((y - 180) / 20);
-                        if (index >= 0 && index < buildings.length) {
-                            buyBuilding(index);
-                        }
-                    } else {
-                        const index = Math.floor((y - 180) / 20);
-                        if (index >= 0 && index < upgrades.length) {
-                            buyUpgrade(index);
-                        }
-                    }
-                }
-            }
-
-            canvas.addEventListener("click", onClick);
-
-            function onKeyDown(e) {
-                if (e.key === "w" || e.key === "W") {
-                    if (money >= workerCost) {
-                        money -= workerCost;
-                        workers++;
-                        workerCost = Math.floor(workerCost * 1.4);
-                        showMsg("Worker eingestellt.");
-                    } else {
-                        showMsg("Zu wenig Geld für Worker.");
-                    }
-                }
-                if (e.key === "c" || e.key === "C") {
-                    if (money >= 100) {
-                        money -= 100;
-                        click += 1;
-                        showMsg("Click Power erhöht.");
-                    } else {
-                        showMsg("Zu wenig Geld für Click Upgrade.");
-                    }
-                }
-                if (e.key === "p" || e.key === "P") {
-                    prestigeReset();
-                }
-                if (e.key === "s" || e.key === "S") {
-                    save();
-                }
-                if (e.key === "l" || e.key === "L") {
-                    load();
-                }
-                if (e.key === "u" || e.key === "U") {
-                    const idx = upgrades.findIndex(u => !u.bought);
-                    if (idx >= 0) {
-                        buyUpgrade(idx);
-                    } else {
-                        showMsg("Alle Upgrades gekauft.");
-                    }
-                }
-            }
-
-            window.addEventListener("keydown", onKeyDown);
-
-            tycoonUI.setActive(true);
-
-            return {
-                update(dt) {
-                    const income = (passive + workers * 0.5) * multiplier * dt;
-                    money += income;
-                    totalEarned += income;
-
-                    const now = performance.now();
-                    if (now - lastEvent > 10000) {
-                        randomEvent();
-                        lastEvent = now;
-                    }
-
-                    checkAchievements();
-
-                    if (msgTimer > 0) {
-                        msgTimer -= dt;
-                        if (msgTimer <= 0) msg = "";
-                    }
-
-                    const threshold = prestigeThreshold();
-                    const progress = Math.min(1, money / threshold);
-
-                    tycoonUI.update({
-                        money,
-                        passive,
-                        multiplier,
-                        prestige,
-                        prestigePoints,
-                        click,
-                        workers,
-                        totalEarned,
-                        threshold,
-                        progress
-                    });
-                },
-                render() {
-                    ctx.fillStyle = "#020617";
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    ctx.fillStyle = "#0f172a";
-                    ctx.fillRect(0, 0, canvas.width, 120);
-
-                    ctx.fillStyle = "#e5e7eb";
-                    ctx.font = "16px system-ui";
-                    ctx.fillText(`Money: ${Math.floor(money)}`, 20, 30);
-                    ctx.fillText(`Click: ${click}`, 20, 50);
-                    ctx.fillText(`Passive: ${passive.toFixed(1)}/s`, 20, 70);
-                    ctx.fillText(`Workers: ${workers}`, 20, 90);
-
-                    ctx.fillText(`x${multiplier.toFixed(1)} Mult`, canvas.width / 2, 30);
-                    ctx.fillText(`Prestige: ${prestige} (${prestigePoints} pts)`, canvas.width / 2, 50);
-                    ctx.fillText(`Total: ${Math.floor(totalEarned)}`, canvas.width / 2, 70);
-
-                    ctx.font = "12px system-ui";
-                    ctx.fillStyle = "#9ca3af";
-                    ctx.fillText("Klick oben für Geld", 20, 110);
-                    ctx.fillText("W Worker | C Click | P Prestige | S Save | L Load | U Upgrade", 20, 130);
-
-                    ctx.fillStyle = "#111827";
-                    ctx.fillRect(0, 140, canvas.width, canvas.height - 140);
-
-                    ctx.fillStyle = "#e5e7eb";
-                    ctx.font = "13px system-ui";
-                    ctx.fillText("Buildings", 20, 160);
-                    ctx.fillText("Upgrades", canvas.width / 2 + 20, 160);
-
-                    let y = 180;
-                    buildings.forEach((b, i) => {
-                        ctx.fillStyle = "#e5e7eb";
-                        ctx.fillText(
-                            `${b.name} (${b.amount}) - ${Math.floor(b.cost)}$ (+${b.base}/s)`,
-                            20,
-                            y
-                        );
-                        y += 20;
-                    });
-
-                    let uy = 180;
-                    upgrades.forEach(u => {
-                        ctx.fillStyle = u.bought ? "#4ade80" : "#e5e7eb";
-                        const text = u.bought
-                            ? `${u.name} ✔`
-                            : `${u.name} - ${u.cost}$`;
-                        ctx.fillText(text, canvas.width / 2 + 20, uy);
-                        uy += 20;
-                    });
-
-                    ctx.font = "12px system-ui";
-                    ctx.fillStyle = "#9ca3af";
-                    ctx.fillText(`Worker Cost: ${Math.floor(workerCost)}$`, 20, canvas.height - 40);
-
-                    if (msg) {
-                        ctx.fillStyle = "rgba(15,23,42,0.9)";
-                        ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
-                        ctx.fillStyle = "#e5e7eb";
-                        ctx.font = "13px system-ui";
-                        ctx.fillText(msg, 20, canvas.height - 12);
-                    }
-                },
-                destroy() {
-                    canvas.removeEventListener("click", onClick);
-                    window.removeEventListener("keydown", onKeyDown);
-                    tycoonUI.setActive(false);
-                }
-            };
-        }
-    }
-];
-
-/* ============================================================
-   TYCOON UI BRIDGE (rechtses Panel)
-   ============================================================ */
-
-const tycoonUIBridge = {
-    setActive(active) {
-        tycoonStatusLabel.textContent = active ? "Aktiv" : "Inaktiv";
-        tycoonStatusLabel.style.color = active ? "#4ade80" : "#9ca3af";
-    },
-    update(state) {
-        const {
-            money,
-            passive,
-            multiplier,
-            prestige,
-            prestigePoints,
-            click,
-            workers,
-            totalEarned,
-            threshold,
-            progress
-        } = state;
-
-        tycoonMoneyEl.textContent = Math.floor(money).toLocaleString("de-DE");
-        tycoonPassiveEl.textContent = `${passive.toFixed(1)}/s`;
-        tycoonMultEl.textContent = `x${multiplier.toFixed(1)}`;
-        tycoonPrestigeEl.textContent = `${prestige} (${prestigePoints} pts)`;
-
-        tycoonPrestigeInfoEl.textContent =
-            `${Math.floor(money).toLocaleString("de-DE")} / ${Math.floor(threshold).toLocaleString("de-DE")}`;
-        tycoonPrestigeBarEl.style.width = `${progress * 100}%`;
-
-        tycoonClickInfoEl.textContent = `+${click} pro Klick`;
-        tycoonWorkersInfoEl.textContent = `${workers} Worker`;
-        tycoonTotalEarnedEl.textContent = `${Math.floor(totalEarned).toLocaleString("de-DE")} insgesamt verdient`;
-        tycoonNextPrestigeBadgeEl.textContent = `Next Prestige x${(1 + prestige * 0.5).toFixed(1)}`;
-    },
-    log(message) {
-        const entry = document.createElement("div");
-        entry.className = "log-entry";
-        const time = new Date().toLocaleTimeString("de-DE", { hour12: false });
-        entry.innerHTML = `<span class="time">[${time}]</span><span class="pill-muted">${message}</span>`;
-        tycoonLogEl.appendChild(entry);
-        tycoonLogEl.scrollTop = tycoonLogEl.scrollHeight;
-    },
-    updateAchievements(list) {
-        tycoonAchievementsEl.innerHTML = "";
-        const all = [
-            { id: "starter", label: "Starter" },
-            { id: "pro", label: "Pro" },
-            { id: "millionaire", label: "Millionär" },
-            { id: "prestige1", label: "Prestige I" },
-            { id: "prestige3", label: "Prestige III" },
-            { id: "workforce", label: "Workforce" }
-        ];
-        all.forEach(a => {
-            const span = document.createElement("span");
-            span.className = "tycoon-achievement" + (list.includes(a.id) ? " active" : "");
-            span.textContent = a.label;
-            tycoonAchievementsEl.appendChild(span);
-        });
-    }
-};
-
-/* ============================================================
-   MENU RENDERING
-   ============================================================ */
-
-function renderMenu() {
-    menuEl.innerHTML = "";
-    games.forEach(game => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-            <div class="card-title">
-                <span class="icon">${game.icon}</span>
-                <span>${game.name}</span>
-            </div>
-            <div class="card-meta">
-                <span class="card-tag">${game.genre}</span>
-                <span class="card-difficulty">${game.difficulty}</span>
-            </div>
-        `;
-        card.addEventListener("click", () => startGame(game.id));
-        menuEl.appendChild(card);
-    });
+    return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
 }
 
-renderMenu();
-clearCanvas();
-log("Hub geladen. Wähle ein Spiel aus.", "info");
-tycoonUIBridge.setActive(false);
-tycoonUIBridge.updateAchievements([]);
+function pointerDown(e) {
+    e.preventDefault();
+    const pos = getCanvasPos(e);
+    inputState.pointer.x = pos.x;
+    inputState.pointer.y = pos.y;
+    inputState.pointer.down = true;
+    if (currentGame && typeof currentGame.onPointerDown === "function") {
+        currentGame.onPointerDown(pos);
+    }
+}
+
+function pointerMove(e) {
+    if (!inputState.pointer.down && !e.touches) return;
+    const pos = getCanvasPos(e);
+    inputState.pointer.x = pos.x;
+    inputState.pointer.y = pos.y;
+    if (currentGame && typeof currentGame.onPointerMove === "function") {
+        currentGame.onPointerMove(pos);
+    }
+}
+
+function pointerUp(e) {
+    const pos = getCanvasPos(e);
+    inputState.pointer.x = pos.x;
+    inputState.pointer.y = pos.y;
+    inputState.pointer.down = false;
+    if (currentGame && typeof currentGame.onPointerUp === "function") {
+        currentGame.onPointerUp(pos);
+    }
+}
+
+canvas.addEventListener("mousedown", pointerDown);
+canvas.addEventListener("mousemove", pointerMove);
+window.addEventListener("mouseup", pointerUp);
+
+canvas.addEventListener("touchstart", pointerDown, { passive: false });
+canvas.addEventListener("touchmove", pointerMove, { passive: false });
+canvas.addEventListener("touchend", pointerUp, { passive: false });
+
+/* ============================================================
+   RESIZE HANDLING
+   ============================================================ */
+
+function resizeCanvas() {
+    const rect = canvasShell.getBoundingClientRect();
+    const aspect = 16 / 9;
+    let w = rect.width - 16;
+    let h = rect.height - 16;
+    if (w / h > aspect) {
+        w = h * aspect;
+    } else {
+        h = w / aspect;
+    }
+    canvas.width = Math.floor(w);
+    canvas.height = Math.floor(h);
+}
+
+window.addEventListener("resize", () => {
+    if (gameOverlay.classList.contains("active")) {
+        resizeCanvas();
+    }
+});
+
+/* ============================================================
+   FLOATING TEXT (für Tycoon Geld-Popups)
+   ============================================================ */
+
+function spawnFloatingText(text, x, y) {
+    const div = document.createElement("div");
+    div.className = "floating-text";
+    div.textContent = text;
+    const rect = canvas.getBoundingClientRect();
+    const px = rect.left + (x / canvas.width) * rect.width;
+    const py = rect.top + (y / canvas.height) * rect.height;
+    div.style.left = px + "px";
+    div.style.top = py + "px";
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 700);
+}
+
+/* ============================================================
+   GAME: SNAKE
+   ============================================================ */
+
+function createSnakeGame({ canvas, ctx, input }) {
+    const grid = 20;
+    const cols = Math.floor(canvas.width / grid);
+    const rows = Math.floor(canvas.height / grid);
+
+    let snake = [{ x: 5, y: 5 }];
+    let dir = { x: 1, y: 0 };
+    let food = spawnFood();
+    let speed = 8;
+    let acc = 0;
+    let dead = false;
+    let score = 0;
+    let lastSwipe = null;
+
+    function spawnFood() {
+        return {
+            x: Math.floor(Math.random() * cols),
+            y: Math.floor(Math.random() * rows)
+        };
+    }
+
+    function reset() {
+        snake = [{ x: 5, y: 5 }];
+        dir = { x: 1, y: 0 };
+        food = spawnFood();
+        speed = 8;
+        acc = 0;
+        dead = false;
+        score = 0;
+    }
+
+    function handleSwipe(pos) {
+        if (!lastSwipe) {
+            lastSwipe = { x: pos.x, y: pos.y };
+            return;
+        }
+        const dx = pos.x - lastSwipe.x;
+        const dy = pos.y - lastSwipe.y;
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+        if (absX < 10 && absY < 10) return;
+        if (absX > absY) {
+            if (dx > 0 && dir.x !== -1) dir = { x: 1, y: 0 };
+            if (dx < 0 && dir.x !== 1) dir = { x: -1, y: 0 };
+        } else {
+            if (dy > 0 && dir.y !== -1) dir = { x: 0, y: 1 };
+            if (dy < 0 && dir.y !== 1) dir = { x: 0, y: -1 };
+        }
+        lastSwipe = { x: pos.x, y: pos.y };
+    }
+
+    return {
+        update(dt) {
+            if (dead) return;
+            acc += dt;
+            const step = 1 / speed;
+            while (acc >= step) {
+                acc -= step;
+                const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+                if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows) {
+                    dead = true;
+                    break;
+                }
+                if (snake.some(s => s.x === head.x && s.y === head.y)) {
+                    dead = true;
+                    break;
+                }
+                snake.unshift(head);
+                if (head.x === food.x && head.y === food.y) {
+                    score++;
+                    speed = Math.min(18, speed + 0.3);
+                    food = spawnFood();
+                } else {
+                    snake.pop();
+                }
+            }
+        },
+        render() {
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#22c55e";
+            snake.forEach(seg => {
+                ctx.fillRect(seg.x * grid, seg.y * grid, grid - 1, grid - 1);
+            });
+
+            ctx.fillStyle = "#f97316";
+            ctx.fillRect(food.x * grid, food.y * grid, grid - 1, grid - 1);
+
+            ctx.fillStyle = "#e5e7eb";
+            ctx.font = "14px system-ui";
+            ctx.fillText(`Score: ${score}`, 10, 20);
+
+            if (dead) {
+                ctx.fillStyle = "rgba(15,23,42,0.85)";
+                ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
+                ctx.fillStyle = "#f97373";
+                ctx.font = "16px system-ui";
+                ctx.fillText("Game Over – R zum Neustart", 20, canvas.height / 2);
+            }
+        },
+        onKeyDown(e) {
+            if (e.key === "ArrowUp" && dir.y !== 1) dir = { x: 0, y: -1 };
+            if (e.key === "ArrowDown" && dir.y !== -1) dir = { x: 0, y: 1 };
+            if (e.key === "ArrowLeft" && dir.x !== 1) dir = { x: -1, y: 0 };
+            if (e.key === "ArrowRight" && dir.x !== -1) dir = { x: 1, y: 0 };
+            if (e.key === "r") reset();
+        },
+        onPointerDown(pos) {
+            lastSwipe = { x: pos.x, y: pos.y };
+        },
+        onPointerMove(pos) {
+            handleSwipe(pos);
+        },
+        onPointerUp() {
+            lastSwipe = null;
+        },
+        destroy() {}
+    };
+}
+
+/* ============================================================
+   GAME: MEGA TYCOON (ausgebaut, 2D mit Animationen)
+   ============================================================ */
+
+function createMegaTycoonGame({ canvas, ctx, input, spawnFloatingText }) {
+    let money = 0;
+    let click = 1;
+    let passive = 0;
+    let multiplier = 1;
+    let prestige = 0;
+    let totalEarned = 0;
+    let workers = 0;
+    let workerCost = 250;
+    let msg = "";
+    let msgTimer = 0;
+
+    const buildings = [
+        { name: "Stand", tier: "Early", cost: 10, base: 0.2, amount: 0 },
+        { name: "Shop", tier: "Early", cost: 100, base: 1, amount: 0 },
+        { name: "Factory", tier: "Mid", cost: 1000, base: 5, amount: 0 },
+        { name: "Bank", tier: "Mid", cost: 5000, base: 20, amount: 0 },
+        { name: "Corp", tier: "Late", cost: 20000, base: 100, amount: 0 },
+        { name: "MegaCorp", tier: "Late", cost: 100000, base: 400, amount: 0 }
+    ];
+
+    const upgrades = [
+        { name: "Better Click", cost: 200, apply: () => { click += 2; }, bought: false },
+        { name: "Double Passive", cost: 1000, apply: () => { passive *= 2; }, bought: false },
+        { name: "Worker Boost", cost: 2000, apply: () => { workers += 5; }, bought: false },
+        { name: "Mega Multiplier", cost: 5000, apply: () => { multiplier += 1; }, bought: false }
+    ];
+
+    function prestigeThreshold() {
+        return 100000 * Math.pow(1.8, prestige);
+    }
+
+    function showMsg(text) {
+        msg = text;
+        msgTimer = 3;
+    }
+
+    function save() {
+        const data = { money, click, passive, multiplier, prestige, totalEarned, workers, workerCost, buildings, upgrades };
+        localStorage.setItem("megaTycoonPortalSave", JSON.stringify(data));
+        showMsg("Gespeichert.");
+    }
+
+    function load() {
+        const raw = localStorage.getItem("megaTycoonPortalSave");
+        if (!raw) {
+            showMsg("Kein Save gefunden.");
+            return;
+        }
+        try {
+            const d = JSON.parse(raw);
+            money = d.money ?? 0;
+            click = d.click ?? 1;
+            passive = d.passive ?? 0;
+            multiplier = d.multiplier ?? 1;
+            prestige = d.prestige ?? 0;
+            totalEarned = d.totalEarned ?? 0;
+            workers = d.workers ?? 0;
+            workerCost = d.workerCost ?? 250;
+            if (Array.isArray(d.buildings)) {
+                d.buildings.forEach((b, i) => {
+                    if (buildings[i]) {
+                        buildings[i].cost = b.cost ?? buildings[i].cost;
+                        buildings[i].amount = b.amount ?? 0;
+                    }
+                });
+            }
+            if (Array.isArray(d.upgrades)) {
+                d.upgrades.forEach((u, i) => {
+                    if (upgrades[i]) upgrades[i].bought = !!u.bought;
+                });
+            }
+            showMsg("Save geladen.");
+        } catch {
+            showMsg("Fehler beim Laden.");
+        }
+    }
+
+    function prestigeReset() {
+        const threshold = prestigeThreshold();
+        if (money < threshold) {
+            showMsg("Prestige-Schwelle noch nicht erreicht.");
+            return;
+        }
+        prestige++;
+        multiplier += 0.5;
+        money = 0;
+        passive = 0;
+        click = 1;
+        workers = 0;
+        workerCost = 250;
+        buildings.forEach(b => {
+            b.amount = 0;
+            b.cost = Math.max(10, Math.floor(b.cost / 2));
+        });
+        upgrades.forEach(u => u.bought = false);
+        showMsg("Prestige!");
+    }
+
+    function buyBuilding(index) {
+        const b = buildings[index];
+        if (!b) return;
+        if (money >= b.cost) {
+            money -= b.cost;
+            b.amount++;
+            passive += b.base;
+            b.cost = Math.floor(b.cost * 1.25);
+            showMsg(`Gekauft: ${b.name}`);
+        } else {
+            showMsg("Zu wenig Geld.");
+        }
+    }
+
+    function buyUpgrade(index) {
+        const u = upgrades[index];
+        if (!u || u.bought) return;
+        if (money >= u.cost) {
+            money -= u.cost;
+            u.bought = true;
+            u.apply();
+            showMsg(`Upgrade: ${u.name}`);
+        } else {
+            showMsg("Zu wenig Geld.");
+        }
+    }
+
+    function clickArea(x, y) {
+        if (y < canvas.height * 0.35) {
+            const gain = click * multiplier;
+            money += gain;
+            totalEarned += gain;
+            spawnFloatingText("+" + Math.floor(gain), x, y);
+        } else if (y > canvas.height * 0.45 && y < canvas.height - 40) {
+            if (x < canvas.width * 0.5) {
+                const index = Math.floor((y - canvas.height * 0.45) / 20);
+                if (index >= 0 && index < buildings.length) buyBuilding(index);
+            } else {
+                const index = Math.floor((y - canvas.height * 0.45) / 20);
+                if (index >= 0 && index < upgrades.length) buyUpgrade(index);
+            }
+        }
+    }
+
+    return {
+        update(dt) {
+            const income = (passive + workers * 0.5) * multiplier * dt;
+            money += income;
+            totalEarned += income;
+
+            if (msgTimer > 0) {
+                msgTimer -= dt;
+                if (msgTimer <= 0) msg = "";
+            }
+        },
+        render() {
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const topH = canvas.height * 0.35;
+            const midY = canvas.height * 0.45;
+
+            const grad = ctx.createLinearGradient(0, 0, 0, topH);
+            grad.addColorStop(0, "#0f172a");
+            grad.addColorStop(1, "#020617");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, topH);
+
+            ctx.fillStyle = "#e5e7eb";
+            ctx.font = "16px system-ui";
+            ctx.fillText(`Money: ${Math.floor(money)}`, 16, 26);
+            ctx.fillText(`Click: ${click}`, 16, 48);
+            ctx.fillText(`Passive: ${passive.toFixed(1)}/s`, 16, 70);
+            ctx.fillText(`Workers: ${workers}`, 16, 92);
+
+            ctx.fillText(`x${multiplier.toFixed(1)} Mult`, canvas.width / 2, 26);
+            ctx.fillText(`Prestige: ${prestige}`, canvas.width / 2, 48);
+            ctx.fillText(`Total: ${Math.floor(totalEarned)}`, canvas.width / 2, 70);
+
+            ctx.font = "12px system-ui";
+            ctx.fillStyle = "#9ca3af";
+            ctx.fillText("Tap/Klick oben für Geld", 16, topH - 12);
+
+            const threshold = prestigeThreshold();
+            const progress = Math.min(1, money / threshold);
+            const barX = 16;
+            const barY = topH - 30;
+            const barW = canvas.width - 32;
+            const barH = 8;
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(barX, barY, barW, barH);
+            ctx.fillStyle = "#1f2937";
+            ctx.fillRect(barX, barY, barW, barH);
+            ctx.fillStyle = "#22c55e";
+            ctx.fillRect(barX, barY, barW * progress, barH);
+
+            ctx.fillStyle = "#9ca3af";
+            ctx.fillText(`Prestige bei ~${Math.floor(threshold)}`, barX, barY - 4);
+
+            ctx.fillStyle = "#111827";
+            ctx.fillRect(0, midY, canvas.width, canvas.height - midY);
+
+            ctx.fillStyle = "#e5e7eb";
+            ctx.font = "13px system-ui";
+            ctx.fillText("Buildings", 16, midY + 16);
+            ctx.fillText("Upgrades", canvas.width / 2 + 16, midY + 16);
+
+            let y = midY + 34;
+            buildings.forEach(b => {
+                ctx.fillStyle = "#e5e7eb";
+                ctx.fillText(
+                    `${b.name} (${b.amount}) - ${Math.floor(b.cost)}$ (+${b.base}/s)`,
+                    16,
+                    y
+                );
+                y += 20;
+            });
+
+            let uy = midY + 34;
+            upgrades.forEach(u => {
+                ctx.fillStyle = u.bought ? "#4ade80" : "#e5e7eb";
+                const text = u.bought ? `${u.name} ✔` : `${u.name} - ${u.cost}$`;
+                ctx.fillText(text, canvas.width / 2 + 16, uy);
+                uy += 20;
+            });
+
+            ctx.font = "12px system-ui";
+            ctx.fillStyle = "#9ca3af";
+            ctx.fillText(`Worker Cost: ${Math.floor(workerCost)}$`, 16, canvas.height - 20);
+            ctx.fillText("W Worker | C Click | P Prestige | S Save | L Load | U Upgrade", 16, canvas.height - 6);
+
+            if (msg) {
+                ctx.fillStyle = "rgba(15,23,42,0.9)";
+                ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+                ctx.fillStyle = "#e5e7eb";
+                ctx.font = "13px system-ui";
+                ctx.fillText(msg, 16, canvas.height - 16);
+            }
+        },
+        onKeyDown(e) {
+            if (e.key === "w" || e.key === "W") {
+                if (money >= workerCost) {
+                    money -= workerCost;
+                    workers++;
+                    workerCost = Math.floor(workerCost * 1.4);
+                    showMsg("Worker eingestellt.");
+                } else showMsg("Zu wenig Geld für Worker.");
+            }
+            if (e.key === "c" || e.key === "C") {
+                if (money >= 100) {
+                    money -= 100;
+                    click += 1;
+                    showMsg("Click Power erhöht.");
+                } else showMsg("Zu wenig Geld für Click Upgrade.");
+            }
+            if (e.key === "p" || e.key === "P") prestigeReset();
+            if (e.key === "s" || e.key === "S") save();
+            if (e.key === "l" || e.key === "L") load();
+            if (e.key === "u" || e.key === "U") {
+                const idx = upgrades.findIndex(u => !u.bought);
+                if (idx >= 0) buyUpgrade(idx); else showMsg("Alle Upgrades gekauft.");
+            }
+        },
+        onPointerDown(pos) {
+            clickArea(pos.x, pos.y);
+        },
+        onPointerUp() {},
+        onPointerMove() {},
+        destroy() {}
+    };
+}
+
+/* ============================================================
+   GAME: AIM TRAINER (kurz, aber mit Touch)
+   ============================================================ */
+
+function createAimTrainerGame({ canvas, ctx, input }) {
+    let target = spawnTarget();
+    let score = 0;
+    let time = 30;
+    let over = false;
+
+    function spawnTarget() {
+        const r = 18;
+        return {
+            x: r + Math.random() * (canvas.width - 2 * r),
+            y: r + Math.random() * (canvas.height - 2 * r),
+            r
+        };
+    }
+
+    function hit(pos) {
+        if (over) return;
+        const dx = pos.x - target.x;
+        const dy = pos.y - target.y;
+        if (Math.sqrt(dx * dx + dy * dy) <= target.r) {
+            score++;
+            target = spawnTarget();
+        }
+    }
+
+    return {
+        update(dt) {
+            if (over) return;
+            time -= dt;
+            if (time <= 0) {
+                time = 0;
+                over = true;
+            }
+        },
+        render() {
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#e5e7eb";
+            ctx.font = "16px system-ui";
+            ctx.fillText(`Score: ${score}`, 16, 24);
+            ctx.fillText(`Time: ${time.toFixed(1)}s`, 16, 44);
+
+            if (!over) {
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+                ctx.fillStyle = "#ef4444";
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = "#f97316";
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = "#facc15";
+                ctx.fill();
+            } else {
+                ctx.fillStyle = "rgba(15,23,42,0.85)";
+                ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
+                ctx.fillStyle = "#4ade80";
+                ctx.font = "16px system-ui";
+                ctx.fillText(`Fertig! Score: ${score} – R für Restart`, 20, canvas.height / 2);
+            }
+        },
+        onPointerDown(pos) {
+            hit(pos);
+        },
+        onKeyDown(e) {
+            if (e.key === "r") {
+                score = 0;
+                time = 30;
+                over = false;
+                target = spawnTarget();
+            }
+        },
+        destroy() {}
+    };
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+
+renderPortal();
 </script>
 </body>
 </html>
