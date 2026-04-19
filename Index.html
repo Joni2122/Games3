@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>10 Game Hub</title>
+
+<style>
+body {
+    margin:0;
+    font-family:Arial;
+    background:#0f172a;
+    color:white;
+}
+
+header {
+    background:#020617;
+    padding:20px;
+    text-align:center;
+    font-size:28px;
+}
+
+.menu {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:10px;
+    padding:20px;
+}
+
+.card {
+    background:#1e293b;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.card:hover {background:#334155;}
+
+#gameArea {
+    display:none;
+    text-align:center;
+}
+
+canvas {
+    background:black;
+    margin-top:10px;
+}
+button {margin-top:10px;}
+</style>
+</head>
+
+<body>
+
+<header>🎮 10 GAME HUB</header>
+
+<div class="menu" id="menu"></div>
+
+<div id="gameArea">
+    <canvas id="c" width="400" height="400"></canvas><br>
+    <button onclick="back()">⬅ Menü</button>
+</div>
+
+<script>
+const games = [
+"Snake",
+"Flappy Bird",
+"Breakout",
+"Pong",
+"Car Dodge",
+"Space Shooter",
+"Platformer",
+"Memory",
+"Reaction Test",
+"Aim Trainer"
+];
+
+const menu = document.getElementById("menu");
+games.forEach(g=>{
+    let d=document.createElement("div");
+    d.className="card";
+    d.innerText=g;
+    d.onclick=()=>start(g);
+    menu.appendChild(d);
+});
+
+let c=document.getElementById("c");
+let ctx=c.getContext("2d");
+
+function start(g){
+    menu.style.display="none";
+    document.getElementById("gameArea").style.display="block";
+
+    if(g=="Snake") snake();
+    else if(g=="Flappy Bird") flappy();
+    else if(g=="Breakout") breakout();
+    else if(g=="Pong") pong();
+    else if(g=="Car Dodge") car();
+    else if(g=="Space Shooter") space();
+    else if(g=="Platformer") platformer();
+    else if(g=="Memory") memory();
+    else if(g=="Reaction Test") reaction();
+    else if(g=="Aim Trainer") aim();
+}
+
+function back(){
+    location.reload();
+}
+
+/* -------- SNAKE -------- */
+function snake(){
+let s=[{x:200,y:200}],dx=20,dy=0,f={x:100,y:100};
+document.onkeydown=e=>{
+if(e.key=="ArrowUp"){dx=0;dy=-20;}
+if(e.key=="ArrowDown"){dx=0;dy=20;}
+if(e.key=="ArrowLeft"){dx=-20;dy=0;}
+if(e.key=="ArrowRight"){dx=20;dy=0;}
+};
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+let h={x:s[0].x+dx,y:s[0].y+dy};s.unshift(h);
+if(h.x==f.x&&h.y==f.y){
+f={x:Math.floor(Math.random()*20)*20,y:Math.floor(Math.random()*20)*20};
+}else s.pop();
+ctx.fillStyle="lime";s.forEach(a=>ctx.fillRect(a.x,a.y,20,20));
+ctx.fillStyle="red";ctx.fillRect(f.x,f.y,20,20);
+setTimeout(loop,100);
+})();
+}
+
+/* -------- FLAPPY -------- */
+function flappy(){
+let y=200,v=0;
+document.onkeydown=()=>v=-8;
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+v+=1;y+=v;
+ctx.fillStyle="yellow";ctx.fillRect(50,y,20,20);
+setTimeout(loop,30);
+})();
+}
+
+/* -------- BREAKOUT -------- */
+function breakout(){
+let x=200,y=200,dx=3,dy=3,p=150;
+document.onmousemove=e=>p=e.offsetX;
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+x+=dx;y+=dy;
+if(x<0||x>400)dx*=-1;
+if(y<0)dy*=-1;
+if(y>380 && x>p && x<p+100)dy*=-1;
+ctx.fillRect(x,y,10,10);
+ctx.fillRect(p,390,100,10);
+setTimeout(loop,20);
+})();
+}
+
+/* -------- PONG -------- */
+function pong(){
+let y=150,by=200,bx=200,dx=3,dy=3;
+document.onmousemove=e=>y=e.offsetY;
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+bx+=dx;by+=dy;
+if(by<0||by>400)dy*=-1;
+if(bx<10 && by>y && by<y+80)dx*=-1;
+if(bx>390)dx*=-1;
+ctx.fillRect(0,y,10,80);
+ctx.fillRect(bx,by,10,10);
+setTimeout(loop,20);
+})();
+}
+
+/* -------- CAR DODGE -------- */
+function car(){
+let x=180,obs=[];
+document.onkeydown=e=>{
+if(e.key=="ArrowLeft")x-=20;
+if(e.key=="ArrowRight")x+=20;
+};
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+if(Math.random()<0.1)obs.push({x:Math.random()*380,y:0});
+obs.forEach(o=>{o.y+=5;ctx.fillRect(o.x,o.y,20,20);});
+ctx.fillStyle="cyan";ctx.fillRect(x,360,20,20);
+setTimeout(loop,30);
+})();
+}
+
+/* -------- SPACE SHOOTER -------- */
+function space(){
+let x=200,bullets=[];
+document.onkeydown=e=>{
+if(e.key=="ArrowLeft")x-=10;
+if(e.key=="ArrowRight")x+=10;
+if(e.key==" ")bullets.push({x:x,y:350});
+};
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+bullets.forEach(b=>{b.y-=5;ctx.fillRect(b.x,b.y,5,10);});
+ctx.fillRect(x,370,20,20);
+setTimeout(loop,20);
+})();
+}
+
+/* -------- PLATFORMER -------- */
+function platformer(){
+let x=50,y=300,vy=0;
+document.onkeydown=e=>{
+if(e.key==" "&&y>=300)vy=-15;
+};
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+vy+=1;y+=vy;
+if(y>300){y=300;vy=0;}
+ctx.fillRect(x,y,20,20);
+ctx.fillRect(0,320,400,10);
+setTimeout(loop,30);
+})();
+}
+
+/* -------- MEMORY -------- */
+function memory(){
+let nums=[1,2,3,4].sort(()=>Math.random()-0.5);
+let i=0;
+canvas.onclick=()=>{
+if(i<nums.length){
+alert("Nummer: "+nums[i]);
+i++;
+}
+}
+ctx.fillStyle="white";
+ctx.fillText("Klick für nächste Zahl merken!",50,200);
+}
+
+/* -------- REACTION -------- */
+function reaction(){
+ctx.fillStyle="white";
+ctx.fillText("Warte...",150,200);
+setTimeout(()=>{
+ctx.fillStyle="green";
+ctx.fillRect(0,0,400,400);
+let t=Date.now();
+canvas.onclick=()=>{
+alert("Reaktion: "+(Date.now()-t)+" ms");
+};
+},Math.random()*3000+1000);
+}
+
+/* -------- AIM TRAINER -------- */
+function aim(){
+let target={x:200,y:200};
+canvas.onclick=e=>{
+let dx=e.offsetX-target.x;
+let dy=e.offsetY-target.y;
+if(Math.sqrt(dx*dx+dy*dy)<20){
+target={x:Math.random()*380,y:Math.random()*380};
+}
+};
+(function loop(){
+ctx.fillStyle="black";ctx.fillRect(0,0,400,400);
+ctx.beginPath();
+ctx.arc(target.x,target.y,20,0,Math.PI*2);
+ctx.fillStyle="red";
+ctx.fill();
+setTimeout(loop,20);
+})();
+}
+/* ===== ADD GAME ===== */
+games.push("Mega Tycoon");
+
+/* ===== EXTEND START ===== */
+const oldStart3 = start;
+start = function(g){
+    if(g=="Mega Tycoon") megaTycoon();
+    else oldStart3(g);
+};
+
+/* ===== MEGA TYCOON ===== */
+function megaTycoon(){
+
+/* ---------- STATE ---------- */
+let money = 0;
+let click = 1;
+let passive = 0;
+let multiplier = 1;
+let prestige = 0;
+let totalEarned = 0;
+
+let buildings = [
+ {name:"Stand", cost:10, base:0.2, amount:0},
+ {name:"Shop", cost:100, base:1, amount:0},
+ {name:"Factory", cost:1000, base:5, amount:0},
+ {name:"Bank", cost:5000, base:20, amount:0},
+ {name:"Corp", cost:20000, base:100, amount:0},
+ {name:"MegaCorp", cost:100000, base:400, amount:0}
+];
+
+let upgrades = [
+ {name:"Better Click", cost:200, apply:()=>click+=2, bought:false},
+ {name:"Double Passive", cost:1000, apply:()=>passive*=2, bought:false},
+ {name:"Workers Boost", cost:2000, apply:()=>workers+=5, bought:false},
+ {name:"Mega Multiplier", cost:5000, apply:()=>multiplier+=1, bought:false}
+];
+
+let workers = 0;
+let workerCost = 250;
+
+let achievements = [];
+let lastEvent = 0;
+
+/* ---------- SAVE / LOAD ---------- */
+function save(){
+    localStorage.setItem("tycoonSave", JSON.stringify({
+        money, click, passive, multiplier, prestige,
+        buildings, workers, workerCost, upgrades
+    }));
+}
+
+function load(){
+    let s = localStorage.getItem("tycoonSave");
+    if(!s) return;
+    let d = JSON.parse(s);
+    money=d.money; click=d.click; passive=d.passive;
+    multiplier=d.multiplier; prestige=d.prestige;
+    buildings=d.buildings; workers=d.workers;
+    workerCost=d.workerCost; upgrades=d.upgrades;
+}
+
+/* ---------- INPUT ---------- */
+canvas.onclick = (e)=>{
+    if(e.offsetY < 200){
+        money += click * multiplier;
+        totalEarned += click;
+    }
+    else{
+        // BUY BUILDINGS BY CLICK
+        let index = Math.floor((e.offsetY-200)/20);
+        if(buildings[index]){
+            let b = buildings[index];
+            if(money >= b.cost){
+                money -= b.cost;
+                b.amount++;
+                passive += b.base;
+                b.cost *= 1.25;
+            }
+        }
+    }
+};
+
+document.onkeydown = (e)=>{
+    if(e.key=="w" && money>=workerCost){
+        money-=workerCost;
+        workers++;
+        workerCost*=1.4;
+    }
+
+    if(e.key=="c" && money>=100){
+        money-=100;
+        click+=1;
+    }
+
+    if(e.key=="p" && money>100000){
+        prestige++;
+        multiplier+=0.5;
+
+        money=0; passive=0; click=1;
+        buildings.forEach(b=>{b.amount=0;b.cost/=2;});
+    }
+
+    if(e.key=="s") save();
+    if(e.key=="l") load();
+};
+
+/* ---------- EVENTS ---------- */
+function randomEvent(){
+    let r = Math.random();
+    if(r<0.5){
+        money += 1000;
+        msg="💰 Bonus Geld!";
+    } else {
+        passive *= 1.2;
+        msg="⚡ Boost!";
+    }
+}
+
+/* ---------- ACHIEVEMENTS ---------- */
+function checkAchievements(){
+    if(totalEarned>1000 && !achievements.includes("starter")){
+        achievements.push("starter");
+    }
+    if(totalEarned>10000 && !achievements.includes("pro")){
+        achievements.push("pro");
+    }
+}
+
+/* ---------- LOOP ---------- */
+let msg="";
+
+(function loop(){
+
+    // income
+    let income = (passive + workers*0.5) * multiplier;
+    money += income;
+    totalEarned += income;
+
+    // random event every ~10 sec
+    if(Date.now() - lastEvent > 10000){
+        randomEvent();
+        lastEvent = Date.now();
+    }
+
+    checkAchievements();
+
+    // DRAW
+    ctx.fillStyle="#0f172a";
+    ctx.fillRect(0,0,400,400);
+
+    ctx.fillStyle="white";
+    ctx.font="14px Arial";
+
+    ctx.fillText("Money: "+Math.floor(money), 10,20);
+    ctx.fillText("Click: "+click, 10,40);
+    ctx.fillText("Passive: "+passive.toFixed(1), 10,60);
+    ctx.fillText("Workers: "+workers, 10,80);
+    ctx.fillText("x"+multiplier.toFixed(1), 10,100);
+    ctx.fillText("Prestige: "+prestige, 10,120);
+
+    ctx.fillText("Click oben für Geld", 10,140);
+    ctx.fillText("W Worker | C Upgrade", 10,160);
+    ctx.fillText("P Prestige | S Save | L Load", 10,180);
+
+    // buildings
+    let y=220;
+    buildings.forEach(b=>{
+        ctx.fillText(
+        b.name+" ("+b.amount+") - "+Math.floor(b.cost)+"$",
+        10,y
+        );
+        y+=20;
+    });
+
+    // upgrades
+    let uy=220;
+    upgrades.forEach(u=>{
+        ctx.fillText(
+        "[U] "+u.name+" "+(u.bought?"✔":u.cost+"$"),
+        220,uy
+        );
+        uy+=20;
+    });
+
+    // achievements
+    ctx.fillText("Achv: "+achievements.length, 250,20);
+
+    // event msg
+    ctx.fillText(msg, 120,380);
+
+    setTimeout(loop,50);
+
+})();
+}
+</script>
+</body>
+</html>
