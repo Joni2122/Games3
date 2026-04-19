@@ -3,37 +3,655 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Game Portal — 10 Games</title>
+<title>3D Runner — Single Game</title>
 <style>
   :root{
     --bg:#071026;
     --panel:#0f1724;
-    --card:#0f172a;
     --accent:#38bdf8;
     --muted:#9ca3af;
-    --glass: rgba(255,255,255,0.03);
-    --radius:14px;
-    --btn-h:84px;
+    --white:#e6eef8;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(56,189,248,0.06), transparent 8%),
-    radial-gradient(900px 500px at 90% 90%, rgba(99,102,241,0.03), transparent 8%),
-    var(--bg);
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-  header{
-    height:64px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-    border-bottom:1px solid rgba(255,255,255,0.03);
-    position:sticky;top:0;z-index:40;
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071026,#020617);color:var(--white);-webkit-font-smoothing:antialiased}
+  #ui {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    z-index: 30;
+    display:flex;
+    gap:12px;
+    align-items:center;
   }
-  header .title{font-weight:700;letter-spacing:0.02em}
-  main{display:grid;grid-template-columns: 1fr 420px;gap:18px;padding:18px;max-width:1200px;margin:18px auto;width:calc(100% - 36px)}
-  @media (max-width:980px){ main{grid-template-columns:1fr;}}
-  /* left: portal */
-  .portal{background:var(--panel);border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-  .filters{display:flex;gap:8px;margin-bottom:12px;overflow:auto;padding-bottom:6px}
-  .chip{padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .panel {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size:14px;
+    color:var(--white);
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  #score { font-weight:700; font-size:16px; }
+  #startBtn, #restartBtn {
+    background: linear-gradient(90deg,var(--accent),#0ea5e9);
+    color:#021124;
+    border:none;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+  }
+  #hud {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    z-index: 30;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  #message {
+    position: absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%,-50%);
+    z-index:40;
+    background: rgba(2,6,23,0.9);
+    border:1px solid rgba(255,255,255,0.04);
+    padding:18px 22px;
+    border-radius:12px;
+    text-align:center;
+    display:none;
+  }
+  #message h1{margin:0 0 8px 0;font-size:20px}
+  #controls {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 30;
+    display:flex;
+    gap:12px;
+  }
+  .touchBtn {
+    width:72px;height:72px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);
+    display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--white);user-select:none;
+    -webkit-user-select:none;
+  }
+  canvas{display:block;width:100vw;height:100vh}
+  /* small instructions */
+  #footerNote { position: absolute; left: 16px; bottom: 16px; color:var(--muted); font-size:12px; z-index:30 }
+</style>
+</head>
+<body>
+  <div id="ui">
+    <div class="panel">Score: <span id="score">0</span></div>
+    <div class="panel">Speed: <span id="speed">1.0x</span></div>
+    <button id="startBtn" class="panel">Start</button>
+    <button id="restartBtn" class="panel" style="display:none">Restart</button>
+  </div>
+
+  <div id="hud" class="panel">Lives: <span id="lives">3</span></div>
+
+  <div id="message">
+    <h1 id="msgTitle">3D Runner</h1>
+    <div id="msgText">Tippe Start für ein schnelles 3D-Spiel. Steuerung: Links/Rechts oder Touch-Buttons.</div>
+    <div style="margin-top:12px">
+      <button id="msgStart" style="background:var(--accent);border:none;padding:8px 12px;border-radius:8px;cursor:pointer">Start</button>
+    </div>
+  </div>
+
+  <div id="controls">
+    <div id="leftBtn" class="touchBtn">◀</div>
+    <div id="jumpBtn" class="touchBtn">▲</div>
+    <div id="rightBtn" class="touchBtn">▶</div>
+  </div>
+
+  <div id="footerNote">Touch & Keyboard supported • WASD / Arrow keys</div>
+
+  <canvas id="glcanvas"></canvas>
+
+<script>
+/*
+  3D Runner — Single-file game using WebGL2
+  - Simple 3D scene with perspective camera
+  - Player is a 3D cube that can move left/right and jump
+  - Obstacles are 3D boxes spawned ahead; player must avoid
+  - Basic lighting (Lambert) in shader
+  - Touch and keyboard controls
+  - Score, speed scaling, lives
+  - Clean, commented, modular code
+*/
+
+/* -------------------------
+   Utilities
+   ------------------------- */
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+
+/* -------------------------
+   WebGL helpers
+   ------------------------- */
+const canvas = document.getElementById('glcanvas');
+const gl = canvas.getContext('webgl2', { antialias: true });
+
+if(!gl){
+  alert('WebGL2 wird benötigt. Bitte einen modernen Browser verwenden.');
+}
+
+// resize canvas to device pixels
+function resizeCanvasToDisplaySize(){
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.floor(canvas.clientWidth * dpr);
+  const height = Math.floor(canvas.clientHeight * dpr);
+  if(canvas.width !== width || canvas.height !== height){
+    canvas.width = width;
+    canvas.height = height;
+    gl.viewport(0,0,width,height);
+  }
+}
+
+/* compile shader */
+function compileShader(src, type){
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+    console.error(gl.getShaderInfoLog(s));
+    gl.deleteShader(s);
+    return null;
+  }
+  return s;
+}
+
+/* create program */
+function createProgram(vsSrc, fsSrc){
+  const vs = compileShader(vsSrc, gl.VERTEX_SHADER);
+  const fs = compileShader(fsSrc, gl.FRAGMENT_SHADER);
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    console.error(gl.getProgramInfoLog(prog));
+    gl.deleteProgram(prog);
+    return null;
+  }
+  return prog;
+}
+
+/* -------------------------
+   Shaders (simple lambert + color)
+   ------------------------- */
+const vsSource = `#version 300 es
+precision highp float;
+layout(location=0) in vec3 aPosition;
+layout(location=1) in vec3 aNormal;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProj;
+out vec3 vNormal;
+out vec3 vWorldPos;
+void main(){
+  vec4 worldPos = uModel * vec4(aPosition, 1.0);
+  vWorldPos = worldPos.xyz;
+  vNormal = mat3(uModel) * aNormal;
+  gl_Position = uProj * uView * worldPos;
+}
+`;
+
+const fsSource = `#version 300 es
+precision highp float;
+in vec3 vNormal;
+in vec3 vWorldPos;
+out vec4 outColor;
+uniform vec3 uLightDir;
+uniform vec3 uColor;
+uniform vec3 uAmbient;
+uniform float uShininess;
+void main(){
+  vec3 N = normalize(vNormal);
+  vec3 L = normalize(uLightDir);
+  float lambert = max(dot(N, L), 0.0);
+  vec3 diffuse = uColor * lambert;
+  vec3 ambient = uAmbient * uColor;
+  outColor = vec4(diffuse + ambient, 1.0);
+}
+`;
+
+/* -------------------------
+   Geometry: cube
+   ------------------------- */
+function createCube(size=1){
+  const s = size/2;
+  // positions and normals
+  const positions = new Float32Array([
+    // +X
+    s, -s, -s,   s,  s, -s,   s,  s,  s,   s, -s,  s,
+    // -X
+    -s, -s,  s,  -s,  s,  s,  -s,  s, -s,  -s, -s, -s,
+    // +Y
+    -s, s, -s,   -s, s,  s,    s, s,  s,    s, s, -s,
+    // -Y
+    -s, -s,  s,  -s, -s, -s,   s, -s, -s,   s, -s,  s,
+    // +Z
+    -s, -s, s,    s, -s, s,    s,  s, s,   -s,  s, s,
+    // -Z
+    s, -s, -s,   -s, -s, -s,   -s,  s, -s,   s,  s, -s
+  ]);
+  const normals = new Float32Array([
+    // +X
+    1,0,0, 1,0,0, 1,0,0, 1,0,0,
+    // -X
+    -1,0,0,-1,0,0,-1,0,0,-1,0,0,
+    // +Y
+    0,1,0,0,1,0,0,1,0,0,1,0,
+    // -Y
+    0,-1,0,0,-1,0,0,-1,0,0,-1,0,
+    // +Z
+    0,0,1,0,0,1,0,0,1,0,0,1,
+    // -Z
+    0,0,-1,0,0,-1,0,0,-1,0,0,-1
+  ]);
+  const indices = new Uint16Array([
+    0,1,2, 0,2,3,
+    4,5,6, 4,6,7,
+    8,9,10, 8,10,11,
+    12,13,14, 12,14,15,
+    16,17,18, 16,18,19,
+    20,21,22, 20,22,23
+  ]);
+  return {positions, normals, indices};
+}
+
+/* -------------------------
+   Matrices (minimal)
+   ------------------------- */
+function mat4_identity(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
+function mat4_mul(a,b){
+  const out = new Array(16);
+  for(let i=0;i<4;i++){
+    for(let j=0;j<4;j++){
+      out[i*4+j] = 0;
+      for(let k=0;k<4;k++) out[i*4+j] += a[i*4+k]*b[k*4+j];
+    }
+  }
+  return out;
+}
+function mat4_translate(tx,ty,tz){
+  const m = mat4_identity(); m[12]=tx; m[13]=ty; m[14]=tz; return m;
+}
+function mat4_scale(sx,sy,sz){
+  const m = mat4_identity(); m[0]=sx; m[5]=sy; m[10]=sz; return m;
+}
+function mat4_rotateY(a){
+  const c=Math.cos(a), s=Math.sin(a);
+  return [c,0,s,0, 0,1,0,0, -s,0,c,0, 0,0,0,1];
+}
+function mat4_perspective(fovy, aspect, near, far){
+  const f = 1.0/Math.tan(fovy/2);
+  const nf = 1/(near - far);
+  const out = new Array(16);
+  out[0] = f/aspect; out[1]=0; out[2]=0; out[3]=0;
+  out[4]=0; out[5]=f; out[6]=0; out[7]=0;
+  out[8]=0; out[9]=0; out[10]=(far+near)*nf; out[11]=-1;
+  out[12]=0; out[13]=0; out[14]=(2*far*near)*nf; out[15]=0;
+  return out;
+}
+function mat4_lookAt(eye, center, up){
+  const [ex,ey,ez]=eye, [cx,cy,cz]=center, [ux,uy,uz]=up;
+  let zx = ex-cx, zy = ey-cy, zz = ez-cz;
+  let zl = Math.hypot(zx,zy,zz); zx/=zl; zy/=zl; zz/=zl;
+  let xx = uy*zz - uz*zy, xy = uz*zx - ux*zz, xz = ux*zy - uy*zx;
+  let xl = Math.hypot(xx,xy,xz); xx/=xl; xy/=xl; xz/=xl;
+  let yx = zy*xz - zz*xy, yy = zz*xx - zx*xz, yz = zx*xy - zy*xx;
+  return [
+    xx, yx, zx, 0,
+    xy, yy, zy, 0,
+    xz, yz, zz, 0,
+    -(xx*ex + xy*ey + xz*ez),
+    -(yx*ex + yy*ey + yz*ez),
+    -(zx*ex + zy*ey + zz*ez),
+    1
+  ];
+}
+
+/* -------------------------
+   GL Program + Buffers
+   ------------------------- */
+const program = createProgram(vsSource, fsSource);
+gl.useProgram(program);
+const attribPos = 0, attribNormal = 1;
+const uModelLoc = gl.getUniformLocation(program, 'uModel');
+const uViewLoc = gl.getUniformLocation(program, 'uView');
+const uProjLoc = gl.getUniformLocation(program, 'uProj');
+const uLightDirLoc = gl.getUniformLocation(program, 'uLightDir');
+const uColorLoc = gl.getUniformLocation(program, 'uColor');
+const uAmbientLoc = gl.getUniformLocation(program, 'uAmbient');
+
+const cube = createCube(1);
+const posBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+gl.bufferData(gl.ARRAY_BUFFER, cube.positions, gl.STATIC_DRAW);
+
+const normBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
+gl.bufferData(gl.ARRAY_BUFFER, cube.normals, gl.STATIC_DRAW);
+
+const idxBuf = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cube.indices, gl.STATIC_DRAW);
+
+/* enable attributes */
+gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+gl.enableVertexAttribArray(attribPos);
+gl.vertexAttribPointer(attribPos, 3, gl.FLOAT, false, 0, 0);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
+gl.enableVertexAttribArray(attribNormal);
+gl.vertexAttribPointer(attribNormal, 3, gl.FLOAT, false, 0, 0);
+
+/* GL state */
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+
+/* -------------------------
+   Game state
+   ------------------------- */
+let gameRunning = false;
+let score = 0;
+let speedMultiplier = 1.0;
+let lives = 3;
+
+/* player */
+const player = {
+  x: 0, // lane: -1, 0, 1
+  y: 0,
+  z: 0,
+  vx: 0,
+  vy: 0,
+  width: 0.8,
+  height: 0.8,
+  depth: 0.8,
+  lane: 0,
+  onGround: true
+};
+
+/* lanes positions */
+const lanes = [-1.6, 0, 1.6];
+
+/* obstacles */
+const obstacles = []; // each: {x,y,z,w,h,d, type}
+
+/* spawn control */
+let spawnTimer = 0;
+
+/* camera */
+const camera = {
+  eye: [0, 2.2, 6],
+  center: [0, 1.2, 0],
+  up: [0,1,0],
+  fov: Math.PI/3
+};
+
+/* UI refs */
+const scoreEl = document.getElementById('score');
+const speedEl = document.getElementById('speed');
+const livesEl = document.getElementById('lives');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const message = document.getElementById('message');
+const msgStart = document.getElementById('msgStart');
+const msgTitle = document.getElementById('msgTitle');
+const msgText = document.getElementById('msgText');
+
+/* controls */
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const jumpBtn = document.getElementById('jumpBtn');
+
+/* input state */
+const input = { left:false, right:false, jump:false };
+
+/* -------------------------
+   Game logic
+   ------------------------- */
+function resetGame(){
+  score = 0;
+  speedMultiplier = 1.0;
+  lives = 3;
+  player.lane = 0;
+  player.x = lanes[player.lane];
+  player.y = 0;
+  player.vy = 0;
+  player.onGround = true;
+  obstacles.length = 0;
+  spawnTimer = 0;
+  updateUI();
+}
+
+function startGame(){
+  resetGame();
+  gameRunning = true;
+  message.style.display = 'none';
+  startBtn.style.display = 'none';
+  restartBtn.style.display = 'inline-block';
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function endGame(){
+  gameRunning = false;
+  msgTitle.textContent = 'Game Over';
+  msgText.textContent = `Score: ${score}`;
+  message.style.display = 'block';
+  startBtn.style.display = 'inline-block';
+  restartBtn.style.display = 'none';
+}
+
+/* spawn obstacle */
+function spawnObstacle(){
+  // random lane, random size
+  const lane = Math.floor(Math.random()*3);
+  const w = rand(0.6, 1.2);
+  const h = rand(0.6, 1.6);
+  const d = rand(0.6, 1.2);
+  const z = -30; // far ahead
+  obstacles.push({ x: lanes[lane], y: h/2, z: z, w, h, d, lane });
+}
+
+/* collision check AABB */
+function aabbCollision(ax,ay,az,aw,ah,ad, bx,by,bz,bw,bh,bd){
+  return Math.abs(ax-bx) * 2 < (aw + bw) &&
+         Math.abs(ay-by) * 2 < (ah + bh) &&
+         Math.abs(az-bz) * 2 < (ad + bd);
+}
+
+/* update UI */
+function updateUI(){
+  scoreEl.textContent = Math.floor(score);
+  speedEl.textContent = speedMultiplier.toFixed(2) + 'x';
+  livesEl.textContent = lives;
+}
+
+/* -------------------------
+   Input handlers
+   ------------------------- */
+window.addEventListener('keydown', (e)=>{
+  if(!gameRunning) return;
+  if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') input.left = true;
+  if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = true;
+  if(e.key === ' ' || e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') input.jump = true;
+});
+window.addEventListener('keyup', (e)=>{
+  if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') input.left = false;
+  if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = false;
+  if(e.key === ' ' || e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') input.jump = false;
+});
+
+leftBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.left = true; });
+leftBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); input.left = false; });
+rightBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.right = true; });
+rightBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); input.right = false; });
+jumpBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); input.jump = true; setTimeout(()=>input.jump=false, 120); });
+
+leftBtn.addEventListener('mousedown', ()=>input.left = true);
+leftBtn.addEventListener('mouseup', ()=>input.left = false);
+rightBtn.addEventListener('mousedown', ()=>input.right = true);
+rightBtn.addEventListener('mouseup', ()=>input.right = false);
+jumpBtn.addEventListener('mousedown', ()=>{ input.jump = true; setTimeout(()=>input.jump=false, 120); });
+
+startBtn.addEventListener('click', ()=>startGame());
+msgStart.addEventListener('click', ()=>startGame());
+restartBtn.addEventListener('click', ()=>startGame());
+
+/* -------------------------
+   Rendering helpers
+   ------------------------- */
+function drawCube(modelMat, color){
+  gl.uniformMatrix4fv(uModelLoc, false, new Float32Array(modelMat));
+  gl.uniform3fv(uColorLoc, color);
+  gl.uniform3fv(uAmbientLoc, [0.12,0.12,0.12]);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+  gl.drawElements(gl.TRIANGLES, cube.indices.length, gl.UNSIGNED_SHORT, 0);
+}
+
+/* -------------------------
+   Main loop
+   ------------------------- */
+let lastTime = performance.now();
+function loop(t){
+  if(!gameRunning) return;
+  resizeCanvasToDisplaySize();
+
+  const dt = Math.min(0.05, (t - lastTime) / 1000);
+  lastTime = t;
+
+  // update speed gradually
+  speedMultiplier += dt * 0.02; // slowly increase difficulty
+  // spawn obstacles
+  spawnTimer += dt * speedMultiplier;
+  if(spawnTimer > 0.9){
+    spawnTimer = 0;
+    spawnObstacle();
+  }
+
+  // player lateral movement (lane switching)
+  if(input.left){
+    player.lane = clamp(player.lane - 1, -1, 1); // but we use lane index 0..2, so handle below
+  }
+  if(input.right){
+    player.lane = clamp(player.lane + 1, -1, 1);
+  }
+  // convert lane index to lanes array index
+  // We'll keep player.lane as -1,0,1 and map to lanes array
+  const laneIndex = Math.round(player.lane) + 1; // -1->0,0->1,1->2
+  player.x = lanes[laneIndex];
+
+  // jump
+  if(input.jump && player.onGround){
+    player.vy = 6.5;
+    player.onGround = false;
+  }
+  // gravity
+  player.vy -= 18 * dt;
+  player.y += player.vy * dt;
+  if(player.y <= 0){
+    player.y = 0;
+    player.vy = 0;
+    player.onGround = true;
+  }
+
+  // move obstacles toward player (increase z)
+  for(let i=obstacles.length-1;i>=0;i--){
+    const o = obstacles[i];
+    o.z += 12 * dt * speedMultiplier;
+    // collision check
+    if(aabbCollision(player.x, player.y + player.height/2, 0, player.width, player.height, player.depth,
+                    o.x, o.y, o.z, o.w, o.h, o.d)){
+      // hit
+      obstacles.splice(i,1);
+      lives -= 1;
+      updateUI();
+      if(lives <= 0){
+        endGame();
+        return;
+      }
+    } else if(o.z > 6){
+      // passed by player
+      obstacles.splice(i,1);
+      score += Math.floor(10 * speedMultiplier);
+      updateUI();
+    }
+  }
+
+  // update UI
+  updateUI();
+
+  // render scene
+  gl.clearColor(0.02,0.03,0.06,1);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // camera matrices
+  const aspect = canvas.width / canvas.height;
+  const proj = mat4_perspective(camera.fov, aspect, 0.1, 100.0);
+  const view = mat4_lookAt(camera.eye, camera.center, camera.up);
+  gl.uniformMatrix4fv(uViewLoc, false, new Float32Array(view));
+  gl.uniformMatrix4fv(uProjLoc, false, new Float32Array(proj));
+  gl.uniform3fv(uLightDirLoc, [0.5, 0.8, 0.6]);
+
+  // ground plane (draw many cubes scaled flat)
+  for(let i=-6;i<8;i++){
+    for(let j=-2;j<=2;j++){
+      const tx = j * 1.6;
+      const tz = i * 2 - (t*0.5 % 2);
+      const model = mat4_mul(mat4_translate(tx, -0.5, tz), mat4_scale(0.8, 0.1, 1.0));
+      drawCube(model, [0.06,0.08,0.12]);
+    }
+  }
+
+  // draw player cube
+  const playerModel = mat4_mul(mat4_translate(player.x, player.y + player.height/2, 0.8), mat4_scale(player.width, player.height, player.depth));
+  drawCube(playerModel, [0.2,0.6,0.95]);
+
+  // draw obstacles
+  for(const o of obstacles){
+    const model = mat4_mul(mat4_translate(o.x, o.y, o.z), mat4_scale(o.w, o.h, o.d));
+    drawCube(model, [0.95,0.35,0.25]);
+  }
+
+  // small rotating collectible (optional)
+  // increase score slowly
+  score += dt * 1.2 * speedMultiplier;
+
+  // loop
+  requestAnimationFrame(loop);
+}
+
+/* -------------------------
+   Initialization
+   ------------------------- */
+function init(){
+  // initial UI
+  updateUI();
+  // show message
+  message.style.display = 'block';
+  msgTitle.textContent = '3D Runner';
+  msgText.textContent = 'Tap Start. Steuerung: Links/Rechts, Jump. Touch & Keyboard supported.';
+  // set canvas size to full window
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  resizeCanvasToDisplaySize();
+  // pre-spawn a few obstacles to make it interesting
+  for(let i=0;i<3;i++) spawnObstacle();
+}
+init();
+
+</script>
+</body>
+</html>
   .chip.active{color:var(--accent);border-color:rgba(56,189,248,0.18);background:linear-gradient(180deg, rgba(56,189,248,0.02), transparent)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
   .card{
